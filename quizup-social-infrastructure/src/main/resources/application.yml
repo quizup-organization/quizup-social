@@ -1,0 +1,26 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: quizup-social
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/quizup_social
+    username: postgres
+    password: postgres
+
+  flyway:
+    locations: classpath:db/migration/social
+
+axon:
+  distributed:
+    enabled: true
+
+microservice:
+  swagger:
+    description: QuizUp Social Module - Friendships and social interactions
+
+logging:
+  level:
+    io.github.quizup: DEBUG
