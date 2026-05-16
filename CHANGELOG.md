@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/quizup-organization/quizup-social/compare/v1.0.0...v1.1.0) (2026-05-16)
+
+### Features
+
+* add challenge ([2a0e136](https://github.com/quizup-organization/quizup-social/commit/2a0e1367d2cc080d422491f037bd23aad7bfe458))
+
 ## 1.0.0 (2026-05-16)
 
 ### Features
