@@ -1,5 +1,6 @@
 package io.github.quizup.social.infrastructure.out.messaging.mapper;
 
+import io.github.quizup.social.domain.event.ChallengeEvent;
 import io.github.quizup.social.domain.event.FriendRequestEvent;
 import io.github.quizup.social.infrastructure.out.messaging.response.SocialNotification;
 
@@ -41,6 +42,47 @@ public final class SocialEventNotificationMapper {
                     )
             );
             default -> Optional.empty();           // FriendRequestCanceledEvent : pas de notification
+        };
+    }
+
+    public static Optional<SocialNotification> toNotification(ChallengeEvent event) {
+        if (isNull(event)) return Optional.empty();
+
+        return switch (event) {
+            case ChallengeEvent.ChallengeCreatedEvent e -> Optional.of(
+                    new SocialNotification.ChallengeReceivedNotification(
+                            e.challengeId(),
+                            e.challengerId(),
+                            e.topicId(),
+                            e.challengedId(),
+                            e.expiresAt().toString()
+                    )
+            );
+            case ChallengeEvent.ChallengeAcceptedEvent e -> Optional.of(
+                    new SocialNotification.ChallengeAcceptedNotification(
+                            e.challengeId(),
+                            e.gameId(),
+                            e.challengedId(),
+                            e.challengerId(),
+                            e.acceptedAt().toString()
+                    )
+            );
+            case ChallengeEvent.ChallengeDeclinedEvent e -> Optional.of(
+                    new SocialNotification.ChallengeDeclinedNotification(
+                            e.challengeId(),
+                            e.challengedId(),
+                            e.challengerId(),
+                            e.declinedAt().toString()
+                    )
+            );
+            case ChallengeEvent.ChallengeExpiredEvent e -> Optional.of(
+                    new SocialNotification.ChallengeExpiredNotification(
+                            e.challengeId(),
+                            e.challengerId(),
+                            e.expiredAt().toString()
+                    )
+            );
+            default -> Optional.empty();
         };
     }
 }

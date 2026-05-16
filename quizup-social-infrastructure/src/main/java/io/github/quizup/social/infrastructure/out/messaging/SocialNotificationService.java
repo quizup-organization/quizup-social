@@ -1,5 +1,6 @@
 package io.github.quizup.social.infrastructure.out.messaging;
 
+import io.github.quizup.social.domain.event.ChallengeEvent;
 import io.github.quizup.social.domain.event.FriendRequestEvent;
 import io.github.quizup.social.infrastructure.out.messaging.mapper.SocialEventNotificationMapper;
 import io.github.quizup.social.infrastructure.out.messaging.response.SocialNotification;
@@ -30,9 +31,18 @@ public class SocialNotificationService {
                 );
     }
 
+    @EventHandler
+    public void onChallengeEvent(ChallengeEvent event) {
+        SocialEventNotificationMapper.toNotification(event)
+                .ifPresentOrElse(
+                        this::send,
+                        () -> logger.warn("No notification mapping for: {}", event.getClass().getSimpleName())
+                );
+    }
+
     private void send(SocialNotification notification) {
         String destination = DESTINATION_PREFIX + notification.userId();
-        logger.debug("{} published: requestId={}, userId={}", notification.type(), notification.requestId(), notification.userId());
+        logger.debug("{} published: userId={}", notification.type(), notification.userId());
         messagingTemplate.convertAndSend(destination, notification);
     }
 }

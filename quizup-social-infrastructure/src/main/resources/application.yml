@@ -19,7 +19,7 @@ axon:
 
 microservice:
   swagger:
-    description: QuizUp Social Module - Friendships and social interactions
+    description: QuizUp Social Module - Friendships, friend requests and challenges
 
 logging:
   level:

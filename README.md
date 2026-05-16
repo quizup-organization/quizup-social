@@ -9,3 +9,9 @@ Seul `quizup-social-domain` est importable inter-services.
 
 Le code applicatif reste organise sous `io.github.quizup.social.application.*` dans le module infrastructure.
 
+Le module regroupe désormais :
+
+- les demandes d'amitié
+- les amitiés
+- les challenges entre joueurs
+
