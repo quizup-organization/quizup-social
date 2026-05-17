@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/quizup-organization/quizup-social/compare/v1.1.0...v1.1.1) (2026-05-17)
+
+### Bug Fixes
+
+* profiles yml ([211a3ac](https://github.com/quizup-organization/quizup-social/commit/211a3ac8e1add15f73a497faf0fb11955bf42605))
+
 ## [1.1.0](https://github.com/quizup-organization/quizup-social/compare/v1.0.0...v1.1.0) (2026-05-16)
 
 ### Features
