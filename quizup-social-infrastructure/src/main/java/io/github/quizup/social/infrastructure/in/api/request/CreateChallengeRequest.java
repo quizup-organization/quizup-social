@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
  * Requête de création d'un défi
  */
 public record CreateChallengeRequest(
+
         @NotBlank(message = "L'identifiant du joueur défié est obligatoire")
         String challengedId,
 

@@ -1,9 +1,5 @@
 package io.github.quizup.social.infrastructure.in.api;
 
-import io.github.quizup.social.domain.port.in.*;
-import io.github.quizup.social.infrastructure.in.api.mapper.ChallengeResponseMapper;
-import io.github.quizup.social.infrastructure.in.api.request.CreateChallengeRequest;
-import io.github.quizup.social.infrastructure.in.api.response.ChallengeResponse;
 import io.github.quizup.common.domain.model.search.SearchCriteria;
 import io.github.quizup.common.infrastructure.in.api.ResponseEntityBuilder;
 import io.github.quizup.common.infrastructure.in.api.request.SearchRequest;
@@ -11,13 +7,16 @@ import io.github.quizup.common.infrastructure.in.api.response.IdResponse;
 import io.github.quizup.common.infrastructure.in.api.response.PageResponse;
 import io.github.quizup.common.infrastructure.mapper.SearchRequestMapper;
 import io.github.quizup.microservice.infrastructure.security.SecurityHelper;
+import io.github.quizup.social.domain.port.in.*;
+import io.github.quizup.social.infrastructure.in.api.mapper.ChallengeResponseMapper;
+import io.github.quizup.social.infrastructure.in.api.request.CreateChallengeRequest;
+import io.github.quizup.social.infrastructure.in.api.response.ChallengeResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -68,13 +67,8 @@ public class ChallengeController {
      */
     @PostMapping
     public CompletableFuture<ResponseEntity<IdResponse>> createChallenge(@RequestBody @Valid CreateChallengeRequest request) {
-
         String challengeId = UUID.randomUUID().toString();
         String challengerId = SecurityHelper.getUserId();
-
-        logger.info("Creating challenge: challengerId={}, challengedId={}, topicId={}",
-                challengerId, request.challengedId(), request.topicId());
-
         return createChallengeUseCase.create(challengeId, challengerId, request.challengedId(), request.topicId())
                 .thenApply(aggregateId -> ResponseEntityBuilder.creation(ENDPOINT, aggregateId));
     }
@@ -86,10 +80,6 @@ public class ChallengeController {
     public CompletableFuture<ResponseEntity<IdResponse>> acceptChallenge(
             @PathVariable String challengeId
     ) {
-
-        String userId = SecurityHelper.getUserId();
-        logger.info("Accepting challenge: challengeId={}, userId={}", challengeId, userId);
-
         return acceptChallengeUseCase.accept(challengeId)
                 .thenApply(ResponseEntityBuilder::ok);
     }
@@ -100,10 +90,6 @@ public class ChallengeController {
     @PostMapping("/{challengeId}/decline")
     public CompletableFuture<ResponseEntity<IdResponse>> declineChallenge(
             @PathVariable String challengeId) {
-
-        String userId = SecurityHelper.getUserId();
-        logger.info("Declining challenge: challengeId={}, userId={}", challengeId, userId);
-
         return declineChallengeUseCase.decline(challengeId)
                 .thenApply(ResponseEntityBuilder::ok);
     }
@@ -114,8 +100,6 @@ public class ChallengeController {
     @GetMapping("/{challengeId}")
     public CompletableFuture<ResponseEntity<ChallengeResponse>> getChallengeById(
             @PathVariable String challengeId) {
-
-        logger.debug("Getting challenge: challengeId={}", challengeId);
         return getChallengeUseCase.getById(challengeId)
                 .thenApply(ChallengeResponseMapper::toResponse)
                 .thenApply(ResponseEntity::ok);
