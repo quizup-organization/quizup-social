@@ -75,4 +75,33 @@ public final class SocialExceptions {
                     Map.of("userId", userId));
         }
     }
+
+    public static class TopicNotFoundProblem extends SocialProblem {
+        public TopicNotFoundProblem(String topicId) {
+            super("urn:quizup:social:topic:notFound",
+                    ProblemCategory.BUSINESS_RESOURCE_MISSING,
+                    "Topic not found",
+                    "Topic " + topicId + " was not found",
+                    Map.of("topicId", topicId));
+        }
+    }
+
+    public static class UserNotFoundProblem extends SocialProblem {
+        public UserNotFoundProblem(String userId) {
+            super("urn:quizup:social:user:notFound",
+                    ProblemCategory.BUSINESS_RESOURCE_MISSING,
+                    "User not found",
+                    "User " + userId + " was not found",
+                    Map.of("userId", userId));
+        }
+    }
+
+    public static class TopicAlreadyFollowedProblem extends SocialProblem {
+        public TopicAlreadyFollowedProblem(String topicId, String userId) {
+            super("urn:quizup:social:topic:alreadyFollowed",
+                    "Topic already followed",
+                    "User " + userId + " already follows topic " + topicId,
+                    Map.of("topicId", topicId, "userId", userId));
+        }
+    }
 }

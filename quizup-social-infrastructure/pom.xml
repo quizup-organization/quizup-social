@@ -15,6 +15,8 @@
 
     <properties>
         <quizup-game-domain.version>1.0.0</quizup-game-domain.version>
+        <quizup-identity-domain.version>1.0.2-SNAPSHOT</quizup-identity-domain.version>
+        <quizup-theme-domain.version>1.0.3-SNAPSHOT</quizup-theme-domain.version>
     </properties>
 
     <dependencies>
@@ -32,6 +34,16 @@
             <groupId>io.github.quizup</groupId>
             <artifactId>quizup-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.github.quizup</groupId>
+            <artifactId>quizup-theme-domain</artifactId>
+            <version>${quizup-theme-domain.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.quizup</groupId>
+            <artifactId>quizup-identity-domain</artifactId>
+            <version>${quizup-identity-domain.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -46,4 +58,3 @@
         </plugins>
     </build>
 </project>
-
