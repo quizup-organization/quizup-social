@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: quizup-social
+  profiles:
+    default: local
+
+  flyway:
+    locations: classpath:db/migration/social
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+microservice:
+  swagger:
+    description: QuizUp Social Module - Friendships, friend requests and challenges
+
+logging:
+  level:
+    io.github.quizup: ${QUIZUP_LOG_LEVEL:INFO}

@@ -1,0 +1,71 @@
+package io.github.quizup.social.infrastructure.out.messaging.response;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+/**
+ * Notifications sociales. Le discriminant est exposé explicitement par {@code type}
+ * ({@link JsonProperty}) : sérialisé en REST **et** en WebSocket.
+ */
+public interface SocialNotification {
+
+    @JsonProperty("type")
+    SocialNotificationType type();
+
+    String userId();
+
+    enum SocialNotificationType {
+        CHALLENGE_RECEIVED,
+        CHALLENGE_ACCEPTED,
+        CHALLENGE_DECLINED,
+        CHALLENGE_EXPIRED
+    }
+
+    record ChallengeReceivedNotification(
+            String challengeId,
+            String challengerId,
+            String topicId,
+            String userId,
+            String expiresAt
+    ) implements SocialNotification {
+        @Override
+        public SocialNotificationType type() {
+            return SocialNotificationType.CHALLENGE_RECEIVED;
+        }
+    }
+
+    record ChallengeAcceptedNotification(
+            String challengeId,
+            String gameId,
+            String acceptedBy,
+            String userId,
+            String timestamp
+    ) implements SocialNotification {
+        @Override
+        public SocialNotificationType type() {
+            return SocialNotificationType.CHALLENGE_ACCEPTED;
+        }
+    }
+
+    record ChallengeDeclinedNotification(
+            String challengeId,
+            String declinedBy,
+            String userId,
+            String timestamp
+    ) implements SocialNotification {
+        @Override
+        public SocialNotificationType type() {
+            return SocialNotificationType.CHALLENGE_DECLINED;
+        }
+    }
+
+    record ChallengeExpiredNotification(
+            String challengeId,
+            String userId,
+            String timestamp
+    ) implements SocialNotification {
+        @Override
+        public SocialNotificationType type() {
+            return SocialNotificationType.CHALLENGE_EXPIRED;
+        }
+    }
+}
