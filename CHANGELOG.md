@@ -1,3 +1,9 @@
+## [1.4.5](https://github.com/quizup-organization/quizup-social/compare/v1.4.4...v1.4.5) (2026-09-20)
+
+### Bug Fixes
+
+* **deps:** bump quizup-sdk to 2.1.1 ([d978a1e](https://github.com/quizup-organization/quizup-social/commit/d978a1e94dd79a7d07d0dee7bfa0cf4ec8c5ddfb))
+
 ## [1.4.4](https://github.com/quizup-organization/quizup-social/compare/v1.4.3...v1.4.4) (2026-09-20)
 
 ### Bug Fixes
