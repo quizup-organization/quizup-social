@@ -1,3 +1,9 @@
+## [1.4.4](https://github.com/quizup-organization/quizup-social/compare/v1.4.3...v1.4.4) (2026-09-20)
+
+### Bug Fixes
+
+* **config:** align prod service URLs with quizup-* names ([67ff650](https://github.com/quizup-organization/quizup-social/commit/67ff650f3c775570f8046f191719f78344053bea))
+
 ## [1.4.3](https://github.com/quizup-organization/quizup-social/compare/v1.4.2...v1.4.3) (2026-09-20)
 
 ### Bug Fixes
