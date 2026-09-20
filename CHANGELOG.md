@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/quizup-organization/quizup-social/compare/v1.2.0...v1.3.0) (2026-09-20)
+
+### Features
+
+* **observability:** social KPIs (follows, challenges) + consume quizup-sdk 1.3.0 ([7d0260a](https://github.com/quizup-organization/quizup-social/commit/7d0260aa8c332e019ad20219a73408d3e3577011))
+
 ## [1.2.0](https://github.com/quizup-organization/quizup-social/compare/v1.1.0...v1.2.0) (2026-09-20)
 
 ### Features
