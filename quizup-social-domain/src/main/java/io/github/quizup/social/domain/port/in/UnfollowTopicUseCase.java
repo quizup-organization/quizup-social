@@ -10,9 +10,5 @@ public interface UnfollowTopicUseCase {
     default CompletableFuture<String> unfollow(String followId) {
         return unfollow(new TopicFollowerCommand.UnfollowTopicCommand(followId));
     }
-
-    default void unfollowAndWait(String followId) {
-        unfollow(followId).join();
-    }
 }
 

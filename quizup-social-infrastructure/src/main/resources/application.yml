@@ -14,7 +14,7 @@ spring:
 
 microservice:
   swagger:
-    description: QuizUp Social Module - Friendships, friend requests and challenges
+    description: QuizUp Social Module - Topic and player follows, and 1v1 challenges
 
 logging:
   level:

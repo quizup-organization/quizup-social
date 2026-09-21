@@ -14,9 +14,5 @@ public interface FollowTopicUseCase {
     default CompletableFuture<String> follow(String followId, String topicId, String userId) {
         return follow(new TopicFollowerCommand.FollowTopicCommand(followId, topicId, userId));
     }
-
-    default void followAndWait(String followId, String topicId, String userId) {
-        follow(followId, topicId, userId).join();
-    }
 }
 

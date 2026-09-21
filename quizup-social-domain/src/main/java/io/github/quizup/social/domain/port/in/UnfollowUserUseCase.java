@@ -10,8 +10,4 @@ public interface UnfollowUserUseCase {
     default CompletableFuture<String> unfollow(String followId) {
         return unfollow(new UserFollowerCommand.UnfollowUserCommand(followId));
     }
-
-    default void unfollowAndWait(String followId) {
-        unfollow(followId).join();
-    }
 }
