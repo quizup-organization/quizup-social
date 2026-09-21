@@ -1,3 +1,13 @@
+## [1.5.0](https://github.com/quizup-organization/quizup-social/compare/v1.4.5...v1.5.0) (2026-09-21)
+
+### Features
+
+* **follow:** deterministic ids and idempotent non-destructive aggregates ([3825660](https://github.com/quizup-organization/quizup-social/commit/38256600e63565b09ced764c572326420aeeb746))
+
+### Bug Fixes
+
+* **observability:** keep readable console logs in local ([6c17f06](https://github.com/quizup-organization/quizup-social/commit/6c17f06c429875d20ee84ee0060111d8f9ce9d3d))
+
 ## [1.4.5](https://github.com/quizup-organization/quizup-social/compare/v1.4.4...v1.4.5) (2026-09-20)
 
 ### Bug Fixes
