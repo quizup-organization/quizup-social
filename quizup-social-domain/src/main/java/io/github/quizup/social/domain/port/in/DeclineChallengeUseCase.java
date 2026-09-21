@@ -14,10 +14,11 @@ public interface DeclineChallengeUseCase {
      */
     CompletableFuture<String> decline(ChallengeCommand.DeclineChallengeCommand command);
 
-    default CompletableFuture<String> decline(String challengeId) {
+    default CompletableFuture<String> decline(String challengeId, String playerId) {
         return decline(
                 new ChallengeCommand.DeclineChallengeCommand(
-                        challengeId
+                        challengeId,
+                        playerId
                 )
         );
     }

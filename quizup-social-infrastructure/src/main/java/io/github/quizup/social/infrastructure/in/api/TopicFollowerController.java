@@ -10,13 +10,13 @@ import io.github.quizup.microservice.security.SecurityHelper;
 import io.github.quizup.social.domain.port.in.FollowTopicUseCase;
 import io.github.quizup.social.domain.port.in.SearchTopicFollowerUseCase;
 import io.github.quizup.social.domain.port.in.UnfollowTopicUseCase;
+import io.github.quizup.social.domain.model.FollowerIds;
 import io.github.quizup.social.infrastructure.in.api.mapper.TopicFollowerResponseMapper;
 import io.github.quizup.social.infrastructure.in.api.request.FollowTopicRequest;
 import io.github.quizup.social.infrastructure.in.api.response.TopicFollowerResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -59,7 +59,7 @@ public class TopicFollowerController {
     @PostMapping
     public CompletableFuture<ResponseEntity<IdResponse>> follow(@RequestBody FollowTopicRequest request) {
         String userId = SecurityHelper.getUserId();
-        String followId = UUID.randomUUID().toString();
+        String followId = FollowerIds.topic(request.topicId(), userId);
         return followTopicUseCase.follow(followId, request.topicId(), userId)
                 .thenApply(_ -> ResponseEntityBuilder.creation(ENDPOINT, followId));
     }

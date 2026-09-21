@@ -84,7 +84,7 @@ public class ChallengeController {
     public CompletableFuture<ResponseEntity<IdResponse>> acceptChallenge(
             @PathVariable String challengeId
     ) {
-        return acceptChallengeUseCase.accept(challengeId)
+        return acceptChallengeUseCase.accept(challengeId, SecurityHelper.getUserId())
                 .thenApply(ResponseEntityBuilder::ok);
     }
 
@@ -94,7 +94,7 @@ public class ChallengeController {
     @PostMapping("/{challengeId}/decline")
     public CompletableFuture<ResponseEntity<IdResponse>> declineChallenge(
             @PathVariable String challengeId) {
-        return declineChallengeUseCase.decline(challengeId)
+        return declineChallengeUseCase.decline(challengeId, SecurityHelper.getUserId())
                 .thenApply(ResponseEntityBuilder::ok);
     }
 

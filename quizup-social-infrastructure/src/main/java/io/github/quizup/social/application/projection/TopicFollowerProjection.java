@@ -1,12 +1,17 @@
 package io.github.quizup.social.application.projection;
 
 import io.github.quizup.social.domain.event.TopicFollowerEvent;
+import io.github.quizup.social.domain.model.FollowerIds;
 import io.github.quizup.social.domain.model.TopicFollower;
 import io.github.quizup.social.domain.port.out.TopicFollowerRepositoryPort;
 import org.axonframework.eventhandling.EventHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Projection du suivi des sujets. La clé est la <b>clé naturelle</b> ({@code userId:topicId}),
+ * ce qui rend l'upsert/delete idempotent et tolérant aux événements en double (rejeu).
+ */
 @Component
 public class TopicFollowerProjection {
 
@@ -21,7 +26,7 @@ public class TopicFollowerProjection {
     public void on(TopicFollowerEvent.TopicFollowedEvent event) {
         topicFollowerRepositoryPort.save(
                 new TopicFollower(
-                        event.followId(),
+                        FollowerIds.topic(event.topicId(), event.userId()),
                         event.topicId(),
                         event.userId(),
                         event.followedAt()
@@ -32,6 +37,8 @@ public class TopicFollowerProjection {
     @EventHandler
     @Transactional
     public void on(TopicFollowerEvent.TopicUnfollowedEvent event) {
-        topicFollowerRepositoryPort.deleteById(event.followId());
+        topicFollowerRepositoryPort.deleteById(
+                FollowerIds.topic(event.topicId(), event.userId())
+        );
     }
 }

@@ -84,6 +84,10 @@ public class ChallengeAggregate {
             throw new ChallengeExceptions.ChallengeNotPendingProblem(challengeId, status.name());
         }
 
+        if (!challengedId.equals(command.playerId())) {
+            throw new ChallengeExceptions.UnauthorizedChallengeActionProblem(challengeId, command.playerId());
+        }
+
         String gameId = UUID.randomUUID().toString();
 
         AggregateLifecycle.apply(
@@ -104,6 +108,10 @@ public class ChallengeAggregate {
 
         if (!ChallengeStatus.PENDING.equals(status)) {
             throw new ChallengeExceptions.ChallengeNotPendingProblem(challengeId, status.name());
+        }
+
+        if (!challengedId.equals(command.playerId())) {
+            throw new ChallengeExceptions.UnauthorizedChallengeActionProblem(challengeId, command.playerId());
         }
 
         AggregateLifecycle.apply(

@@ -5,21 +5,22 @@ import io.github.quizup.social.domain.command.UserFollowerCommand;
 import io.github.quizup.social.domain.event.UserFollowerEvent;
 import io.github.quizup.social.domain.exception.SocialExceptions;
 import io.github.quizup.social.domain.port.out.ProfileRepositoryPort;
-import io.github.quizup.social.domain.port.out.UserFollowerRepositoryPort;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.time.Instant;
+
 /**
  * Test Axon in-memory de l'agrégat {@link UserFollowerAggregate} via {@link AggregateTestFixture}.
  * <p>
  * 100 % in-memory : event store de l'agrégat en mémoire, aucun Postgres ni Axon Server.
+ * L'unicité est portée par l'id déterministe ; seule l'existence de la **cible** est vérifiée.
  */
 class UserFollowerAggregateTest {
 
     private final ProfileRepositoryPort profileRepositoryPort = Mockito.mock(ProfileRepositoryPort.class);
-    private final UserFollowerRepositoryPort userFollowerRepositoryPort = Mockito.mock(UserFollowerRepositoryPort.class);
 
     private final AggregateTestFixture<UserFollowerAggregate> fixture =
             new AggregateTestFixture<>(UserFollowerAggregate.class);
@@ -27,33 +28,28 @@ class UserFollowerAggregateTest {
     @BeforeEach
     void setUp() {
         fixture.registerInjectableResource(profileRepositoryPort);
-        fixture.registerInjectableResource(userFollowerRepositoryPort);
     }
 
     @Test
     void followUser_appliesUserFollowedEvent() {
-        Mockito.when(profileRepositoryPort.existsById("follower-1")).thenReturn(true);
         Mockito.when(profileRepositoryPort.existsById("followed-1")).thenReturn(true);
-        Mockito.when(userFollowerRepositoryPort.exists("follower-1", "followed-1")).thenReturn(false);
 
         UserFollowerCommand.FollowUserCommand command = new UserFollowerCommand.FollowUserCommand(
-                "uf-1", "follower-1", "followed-1");
+                "follower-1:followed-1", "follower-1", "followed-1");
 
         fixture.givenNoPriorActivity()
                 .when(command)
                 .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
                         UserFollowerEvent.UserFollowedEvent.class,
-                        e -> ((UserFollowerEvent.UserFollowedEvent) e).followId().equals("uf-1")
+                        e -> ((UserFollowerEvent.UserFollowedEvent) e).followId().equals("follower-1:followed-1")
                                 && ((UserFollowerEvent.UserFollowedEvent) e).followerId().equals("follower-1")
                                 && ((UserFollowerEvent.UserFollowedEvent) e).followedId().equals("followed-1")));
     }
 
     @Test
     void followUser_onSelf_isRejected() {
-        Mockito.when(profileRepositoryPort.existsById("user-1")).thenReturn(true);
-
         UserFollowerCommand.FollowUserCommand command = new UserFollowerCommand.FollowUserCommand(
-                "uf-1", "user-1", "user-1");
+                "user-1:user-1", "user-1", "user-1");
 
         fixture.givenNoPriorActivity()
                 .when(command)
@@ -61,16 +57,37 @@ class UserFollowerAggregateTest {
     }
 
     @Test
-    void followUser_whenAlreadyFollowed_isRejected() {
-        Mockito.when(profileRepositoryPort.existsById("follower-1")).thenReturn(true);
+    void followUser_whenAlreadyFollowed_isIdempotent() {
+        fixture.given(new UserFollowerEvent.UserFollowedEvent(
+                        "follower-1:followed-1", "follower-1", "followed-1", Instant.now()))
+                .when(new UserFollowerCommand.FollowUserCommand(
+                        "follower-1:followed-1", "follower-1", "followed-1"))
+                .expectNoEvents();
+    }
+
+    @Test
+    void unfollowUser_thenFollowAgain_reappliesFollowedEvent() {
         Mockito.when(profileRepositoryPort.existsById("followed-1")).thenReturn(true);
-        Mockito.when(userFollowerRepositoryPort.exists("follower-1", "followed-1")).thenReturn(true);
 
-        UserFollowerCommand.FollowUserCommand command = new UserFollowerCommand.FollowUserCommand(
-                "uf-2", "follower-1", "followed-1");
+        fixture.given(
+                        new UserFollowerEvent.UserFollowedEvent(
+                                "follower-1:followed-1", "follower-1", "followed-1", Instant.now()),
+                        new UserFollowerEvent.UserUnfollowedEvent(
+                                "follower-1:followed-1", "follower-1", "followed-1", Instant.now()))
+                .when(new UserFollowerCommand.FollowUserCommand(
+                        "follower-1:followed-1", "follower-1", "followed-1"))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        UserFollowerEvent.UserFollowedEvent.class,
+                        e -> ((UserFollowerEvent.UserFollowedEvent) e).followId().equals("follower-1:followed-1")));
+    }
 
-        fixture.givenNoPriorActivity()
-                .when(command)
-                .expectException(SocialExceptions.UserAlreadyFollowedProblem.class);
+    @Test
+    void unfollowUser_whenAlreadyUnfollowed_isIdempotent() {
+        fixture.given(new UserFollowerEvent.UserFollowedEvent(
+                        "follower-1:followed-1", "follower-1", "followed-1", Instant.now()),
+                        new UserFollowerEvent.UserUnfollowedEvent(
+                                "follower-1:followed-1", "follower-1", "followed-1", Instant.now()))
+                .when(new UserFollowerCommand.UnfollowUserCommand("follower-1:followed-1"))
+                .expectNoEvents();
     }
 }

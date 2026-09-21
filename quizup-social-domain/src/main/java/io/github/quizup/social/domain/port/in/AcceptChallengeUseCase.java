@@ -14,10 +14,11 @@ public interface AcceptChallengeUseCase {
      */
     CompletableFuture<String> accept(ChallengeCommand.AcceptChallengeCommand command);
 
-    default CompletableFuture<String> accept(String challengeId) {
+    default CompletableFuture<String> accept(String challengeId, String playerId) {
         return accept(
                 new ChallengeCommand.AcceptChallengeCommand(
-                        challengeId
+                        challengeId,
+                        playerId
                 )
         );
     }

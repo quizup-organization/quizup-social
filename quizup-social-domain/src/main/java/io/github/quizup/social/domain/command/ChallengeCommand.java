@@ -7,10 +7,11 @@ public interface ChallengeCommand {
     String challengeId();
 
     /**
-     * Command pour accepter un défi.
+     * Command pour accepter un défi (par le joueur défié).
      */
     record AcceptChallengeCommand(
-            @TargetAggregateIdentifier String challengeId
+            @TargetAggregateIdentifier String challengeId,
+            String playerId
     ) implements ChallengeCommand{
     }
 
@@ -34,10 +35,11 @@ public interface ChallengeCommand {
     }
 
     /**
-     * Command pour refuser un défi.
+     * Command pour refuser un défi (par le joueur défié).
      */
     record DeclineChallengeCommand(
-            @TargetAggregateIdentifier String challengeId
+            @TargetAggregateIdentifier String challengeId,
+            String playerId
     ) implements ChallengeCommand {
     }
 

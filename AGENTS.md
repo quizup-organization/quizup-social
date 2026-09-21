@@ -39,6 +39,9 @@ Gestion des relations sociales entre joueurs :
 | POST    | `/api/challenges/{challengeId}/runs`    | `registerRun(String, RegisterChallengeRunRequest)` | `IdResponse`             |
 | GET     | `/api/challenges/{challengeId}`         | `getChallengeById(String)`                | `ChallengeResponse`               |
 
+**Autorisation** : `accept`/`decline` sont réservés au **joueur défié** (l'acteur `SecurityHelper.getUserId()`
+est porté par la commande ; l'agrégat rejette tout autre appelant via `UnauthorizedChallengeActionProblem`).
+
 **Runs asynchrones** : chaque participant peut enregistrer le `gameId` de son run
 (`POST /runs`, joueur issu du JWT). `ChallengeResponse` expose `challengerGameId` /
 `challengedGameId` / `replayGameId` ; le premier run enregistré sert de référence au replay de
@@ -47,10 +50,12 @@ autoritaire). Le `gameId` « synchrone » reste celui créé à l'acceptation.
 
 ### `TopicFollowerController` — `/api/topic-follows`
 
-Suivi **non destructif** : le `followId` est déterministe (`userId + ":" + topicId`), un follow sur
-une même `(user, topic)` est idempotent, et l'unfollow ne supprime pas la ligne — il pose
-`unfollowedAt` (l'agrégat reste rechargable pour être re-suivi). La projection
-`TopicFollowerProjection` est la source de vérité de l'état de suivi.
+Suivi **non destructif** : le `followId` de l'agrégat est déterministe (`userId + ":" + topicId`),
+un follow sur une même `(user, topic)` cible donc le **même agrégat** (Axon sérialise par id) :
+follow/unfollow sont **idempotents** et le re-suivi ne crée pas de collision d'id. L'agrégat n'est
+**jamais supprimé** (état `followed`). Le read model `topic_follower` reste la source de vérité de
+l'état de suivi : la projection **upsert/delete par clé naturelle** (ligne présente = suivi),
+idempotente et rejouable.
 
 | Méthode | Chemin                          | Handler                          | Response                              |
 |---------|---------------------------------|----------------------------------|---------------------------------------|
@@ -63,9 +68,11 @@ une même `(user, topic)` est idempotent, et l'unfollow ne supprime pas la ligne
 
 ### `UserFollowerController` — `/api/user-follows`
 
-Suivi **unidirectionnel** d'un joueur (aucune demande ni acceptation). `followId` généré côté
-controller ; suivi idempotent protégé par contrainte unique `(follower_id, followed_id)`. On ne peut
-pas se suivre soi-même. Unfollow = suppression, re-follow possible.
+Suivi **unidirectionnel** d'un joueur (aucune demande ni acceptation). Le `followId` de l'agrégat
+est déterministe (`followerId + ":" + followedId`) : follow/unfollow sont **idempotents** et le
+re-suivi ne crée pas de collision d'id (l'agrégat n'est jamais supprimé — état `followed`). Le read
+model `user_follower` (contrainte unique `(follower_id, followed_id)`) reste la source de vérité de
+l'état de suivi. On ne peut pas se suivre soi-même.
 
 | Méthode | Chemin                                | Handler                     | Response                             |
 |---------|---------------------------------------|-----------------------------|--------------------------------------|
@@ -92,11 +99,14 @@ pas se suivre soi-même. Unfollow = suppression, re-follow possible.
 
 | Port out    | Service cible     | Query Axon envoyée (QueryGateway)                          |
 |-------------|-------------------|------------------------------------------------------------|
-| `TopicRepositoryPort` | `quizup-theme`    | `TopicQuery.TopicExistsByIdQuery`                          |
 | `ProfileRepositoryPort`  | `quizup-profile`    | `ProfileQuery.ProfileExistsByIdQuery`, `ProfileQuery.FindProfileQuery` |
 
-Implémentations dans `application/service/` : `TopicService` (→ theme), `ProfileService`
+Implémentation dans `application/service/` : `ProfileService`
 (→ profile, nom via `Profile::displayName`).
+
+> Le suivi de sujet ne valide **plus** l'existence du topic (pas de requête synchrone vers
+> `quizup-theme` sur le chemin d'écriture) : le `topicId` vient d'un sujet affiché par le client et
+> la projection theme ignore les topics inconnus.
 
 **Ports sortants locaux** : `ChallengeRepositoryPort`, `TopicFollowerRepositoryPort`,
 `UserFollowerRepositoryPort`.

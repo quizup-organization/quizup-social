@@ -58,6 +58,38 @@ class ChallengeAggregateTest {
                 .expectException(ChallengeExceptions.UnauthorizedChallengeActionProblem.class);
     }
 
+    @Test
+    void acceptChallenge_byChallenged_appliesAcceptedEvent() {
+        fixture.given(created())
+                .when(new ChallengeCommand.AcceptChallengeCommand(CHALLENGE_ID, CHALLENGED))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        ChallengeEvent.ChallengeAcceptedEvent.class,
+                        e -> CHALLENGED.equals(((ChallengeEvent.ChallengeAcceptedEvent) e).challengedId())));
+    }
+
+    @Test
+    void acceptChallenge_byNonChallenged_isRejected() {
+        fixture.given(created())
+                .when(new ChallengeCommand.AcceptChallengeCommand(CHALLENGE_ID, "intruder"))
+                .expectException(ChallengeExceptions.UnauthorizedChallengeActionProblem.class);
+    }
+
+    @Test
+    void declineChallenge_byChallenged_appliesDeclinedEvent() {
+        fixture.given(created())
+                .when(new ChallengeCommand.DeclineChallengeCommand(CHALLENGE_ID, CHALLENGED))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        ChallengeEvent.ChallengeDeclinedEvent.class,
+                        e -> CHALLENGED.equals(((ChallengeEvent.ChallengeDeclinedEvent) e).challengedId())));
+    }
+
+    @Test
+    void declineChallenge_byNonChallenged_isRejected() {
+        fixture.given(created())
+                .when(new ChallengeCommand.DeclineChallengeCommand(CHALLENGE_ID, "intruder"))
+                .expectException(ChallengeExceptions.UnauthorizedChallengeActionProblem.class);
+    }
+
     private ChallengeEvent.ChallengeCreatedEvent created() {
         Instant now = Instant.now();
         return new ChallengeEvent.ChallengeCreatedEvent(
