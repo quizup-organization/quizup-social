@@ -4,6 +4,7 @@ import io.github.quizup.social.domain.event.TopicFollowerEvent;
 import io.github.quizup.social.domain.model.FollowerIds;
 import io.github.quizup.social.domain.model.TopicFollower;
 import io.github.quizup.social.domain.port.out.TopicFollowerRepositoryPort;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
  * ce qui rend l'upsert/delete idempotent et tolérant aux événements en double (rejeu).
  */
 @Component
+@ProcessingGroup("topic-follower-projection")
 public class TopicFollowerProjection {
 
     private final TopicFollowerRepositoryPort topicFollowerRepositoryPort;

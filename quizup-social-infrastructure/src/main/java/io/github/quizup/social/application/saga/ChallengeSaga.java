@@ -11,6 +11,7 @@ import io.github.quizup.game.domain.model.GamePlayerType;
 import lombok.Getter;
 import lombok.Setter;
 import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.deadline.DeadlineManager;
 import org.axonframework.deadline.annotation.DeadlineHandler;
 import org.axonframework.modelling.saga.EndSaga;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Saga
+@ProcessingGroup("challenge-saga")
 public class ChallengeSaga {
 
     private static final Logger logger = LoggerFactory.getLogger(ChallengeSaga.class);

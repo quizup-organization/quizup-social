@@ -4,6 +4,7 @@ import io.github.quizup.microservice.core.domain.model.notification.Notification
 import io.github.quizup.social.domain.event.ChallengeEvent;
 import io.github.quizup.social.infrastructure.out.messaging.mapper.SocialEventNotificationMapper;
 import io.github.quizup.social.infrastructure.out.messaging.response.SocialNotification;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.DomainEventMessage;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
  * que les notifications de partie/lobby.
  */
 @Service
+@ProcessingGroup("social-notification")
 public class SocialNotificationService {
 
     private static final Logger logger = LoggerFactory.getLogger(SocialNotificationService.class);

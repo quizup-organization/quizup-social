@@ -4,6 +4,7 @@ import io.github.quizup.social.domain.event.*;
 import io.github.quizup.social.domain.model.Challenge;
 import io.github.quizup.social.domain.model.ChallengeStatus;
 import io.github.quizup.social.domain.port.out.ChallengeRepositoryPort;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Utilise le port sortant pour persister
  */
 @Component
+@ProcessingGroup("challenge-projection")
 public class ChallengeProjection {
 
     private static final Logger logger = LoggerFactory.getLogger(ChallengeProjection.class);
