@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/quizup-organization/quizup-social/compare/v1.5.0...v1.6.0) (2026-09-22)
+
+### Features
+
+* **social:** explicit Axon processing groups ([e631e94](https://github.com/quizup-organization/quizup-social/commit/e631e9414b96d35cac0f0ca79b0d5ea8d84141ac))
+
 ## [1.5.0](https://github.com/quizup-organization/quizup-social/compare/v1.4.5...v1.5.0) (2026-09-21)
 
 ### Features
