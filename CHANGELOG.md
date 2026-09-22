@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/quizup-organization/quizup-social/compare/v1.6.0...v1.6.1) (2026-09-22)
+
+### Bug Fixes
+
+* **social:** upgrade quizup-parent to 2.3.1 (registration address fix) ([8749772](https://github.com/quizup-organization/quizup-social/commit/87497728827a1050ce402f1290e634c4742dd41d))
+
 ## [1.6.0](https://github.com/quizup-organization/quizup-social/compare/v1.5.0...v1.6.0) (2026-09-22)
 
 ### Features
