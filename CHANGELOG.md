@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/quizup-organization/quizup-social/compare/v1.6.4...v1.7.0) (2026-09-23)
+
+### Features
+
+* **social:** REST alignment (follows GET by-id, unfollow 204, cancel as action) and bump SDK to 2.4.1 ([b24c9e9](https://github.com/quizup-organization/quizup-social/commit/b24c9e9fbc64f97bcca0276bb05169fb58eebef6))
+
 ## [1.6.4](https://github.com/quizup-organization/quizup-social/compare/v1.6.3...v1.6.4) (2026-09-22)
 
 ### Bug Fixes
