@@ -23,6 +23,7 @@ import java.util.UUID;
  * - CreateChallenge → PENDING (orchestration délai déléguée à la saga)
  * - AcceptChallenge → ACCEPTED (orchestration CreateGame déléguée à la saga)
  * - DeclineChallenge → DECLINED (rien à annuler)
+ * - CancelChallenge → CANCELED (instigateur, tant que PENDING)
  * - ExpireChallenge → EXPIRED (rien à annuler)
  */
 @Aggregate
@@ -125,6 +126,28 @@ public class ChallengeAggregate {
     }
 
     @CommandHandler
+    public void handle(ChallengeCommand.CancelChallengeCommand command) {
+        logger.debug("Handling CancelChallengeCommand: challengeId={}", command.challengeId());
+
+        if (!ChallengeStatus.PENDING.equals(status)) {
+            throw new ChallengeExceptions.ChallengeNotPendingProblem(challengeId, status.name());
+        }
+
+        if (!challengerId.equals(command.playerId())) {
+            throw new ChallengeExceptions.UnauthorizedChallengeActionProblem(challengeId, command.playerId());
+        }
+
+        AggregateLifecycle.apply(
+                new ChallengeEvent.ChallengeCanceledEvent(
+                        challengeId,
+                        challengerId,
+                        challengedId,
+                        Instant.now()
+                )
+        );
+    }
+
+    @CommandHandler
     public void handle(ChallengeCommand.ExpireChallengeCommand command) {
         logger.debug("Handling ExpireChallengeCommand: challengeId={}", command.challengeId());
 
@@ -203,6 +226,11 @@ public class ChallengeAggregate {
     public void on(ChallengeEvent.ChallengeDeclinedEvent event) {
         this.status = ChallengeStatus.DECLINED;
         this.declinedAt = event.declinedAt();
+    }
+
+    @EventSourcingHandler
+    public void on(ChallengeEvent.ChallengeCanceledEvent event) {
+        this.status = ChallengeStatus.CANCELED;
     }
 
     @EventSourcingHandler

@@ -2,6 +2,7 @@ package io.github.quizup.social.application.service;
 
 import io.github.quizup.social.domain.command.ChallengeCommand;
 import io.github.quizup.social.domain.port.in.AcceptChallengeUseCase;
+import io.github.quizup.social.domain.port.in.CancelChallengeUseCase;
 import io.github.quizup.social.domain.port.in.CreateChallengeUseCase;
 import io.github.quizup.social.domain.port.in.DeclineChallengeUseCase;
 import io.github.quizup.social.domain.port.in.RegisterChallengeRunUseCase;
@@ -15,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
  * Délègue au CommandGateway Axon
  */
 @Service
-public class ChallengeCommandService implements CreateChallengeUseCase, AcceptChallengeUseCase, DeclineChallengeUseCase, RegisterChallengeRunUseCase {
+public class ChallengeCommandService implements CreateChallengeUseCase, AcceptChallengeUseCase, DeclineChallengeUseCase, CancelChallengeUseCase, RegisterChallengeRunUseCase {
 
     private final CommandGateway commandGateway;
 
@@ -35,6 +36,11 @@ public class ChallengeCommandService implements CreateChallengeUseCase, AcceptCh
 
     @Override
     public CompletableFuture<String> decline(ChallengeCommand.DeclineChallengeCommand command) {
+        return commandGateway.send(command);
+    }
+
+    @Override
+    public CompletableFuture<String> cancel(ChallengeCommand.CancelChallengeCommand command) {
         return commandGateway.send(command);
     }
 

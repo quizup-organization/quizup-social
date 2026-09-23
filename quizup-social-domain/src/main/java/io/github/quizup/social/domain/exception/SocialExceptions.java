@@ -27,4 +27,24 @@ public final class SocialExceptions {
                     Map.of("userId", userId));
         }
     }
+
+    public static class TopicFollowerNotFoundProblem extends SocialProblem {
+        public TopicFollowerNotFoundProblem(String followId) {
+            super("urn:quizup:social:topicFollow:notFound",
+                    ProblemCategory.BUSINESS_RESOURCE_MISSING,
+                    "Topic follow not found",
+                    "The topic follow " + followId + " was not found",
+                    Map.of("followId", followId));
+        }
+    }
+
+    public static class UserFollowerNotFoundProblem extends SocialProblem {
+        public UserFollowerNotFoundProblem(String followId) {
+            super("urn:quizup:social:userFollow:notFound",
+                    ProblemCategory.BUSINESS_RESOURCE_MISSING,
+                    "User follow not found",
+                    "The user follow " + followId + " was not found",
+                    Map.of("followId", followId));
+        }
+    }
 }

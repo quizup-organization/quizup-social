@@ -116,6 +116,13 @@ public class ChallengeSaga {
 
     @EndSaga
     @SagaEventHandler(associationProperty = "challengeId")
+    public void on(ChallengeEvent.ChallengeCanceledEvent event) {
+        cancelChallengeExpiredDeadline();
+        logger.debug("Challenge saga ended after cancellation: challengeId={}", event.challengeId());
+    }
+
+    @EndSaga
+    @SagaEventHandler(associationProperty = "challengeId")
     public void on(ChallengeEvent.ChallengeExpiredEvent event) {
         cancelChallengeExpiredDeadline();
         logger.debug("Challenge saga ended after expiration: challengeId={}", event.challengeId());

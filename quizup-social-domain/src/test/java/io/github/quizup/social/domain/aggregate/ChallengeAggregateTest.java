@@ -90,9 +90,37 @@ class ChallengeAggregateTest {
                 .expectException(ChallengeExceptions.UnauthorizedChallengeActionProblem.class);
     }
 
+    @Test
+    void cancelChallenge_byChallenger_appliesCanceledEvent() {
+        fixture.given(created())
+                .when(new ChallengeCommand.CancelChallengeCommand(CHALLENGE_ID, CHALLENGER))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        ChallengeEvent.ChallengeCanceledEvent.class,
+                        e -> CHALLENGER.equals(((ChallengeEvent.ChallengeCanceledEvent) e).challengerId())));
+    }
+
+    @Test
+    void cancelChallenge_byNonChallenger_isRejected() {
+        fixture.given(created())
+                .when(new ChallengeCommand.CancelChallengeCommand(CHALLENGE_ID, CHALLENGED))
+                .expectException(ChallengeExceptions.UnauthorizedChallengeActionProblem.class);
+    }
+
+    @Test
+    void cancelChallenge_whenNotPending_isRejected() {
+        fixture.given(created(), declined())
+                .when(new ChallengeCommand.CancelChallengeCommand(CHALLENGE_ID, CHALLENGER))
+                .expectException(ChallengeExceptions.ChallengeNotPendingProblem.class);
+    }
+
     private ChallengeEvent.ChallengeCreatedEvent created() {
         Instant now = Instant.now();
         return new ChallengeEvent.ChallengeCreatedEvent(
                 CHALLENGE_ID, CHALLENGER, CHALLENGED, TOPIC, now, now.plusSeconds(86_400));
+    }
+
+    private ChallengeEvent.ChallengeDeclinedEvent declined() {
+        return new ChallengeEvent.ChallengeDeclinedEvent(
+                CHALLENGE_ID, CHALLENGER, CHALLENGED, Instant.now());
     }
 }

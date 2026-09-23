@@ -8,6 +8,7 @@ import io.github.quizup.microservice.core.infrastructure.in.api.response.PageRes
 import io.github.quizup.microservice.core.infrastructure.mapper.SearchRequestMapper;
 import io.github.quizup.microservice.security.SecurityHelper;
 import io.github.quizup.social.domain.port.in.FollowUserUseCase;
+import io.github.quizup.social.domain.port.in.GetUserFollowerUseCase;
 import io.github.quizup.social.domain.port.in.SearchUserFollowerUseCase;
 import io.github.quizup.social.domain.port.in.UnfollowUserUseCase;
 import io.github.quizup.social.domain.model.FollowerIds;
@@ -20,9 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Suivi **unidirectionnel** d'un joueur. Aucun endpoint de lecture dédié : les abonnements,
- * abonnés et compteurs s'obtiennent via {@code POST /search} (filtres {@code followerId} /
- * {@code followedId}), le calcul étant fait côté client.
+ * Suivi **unidirectionnel** d'un joueur. Lecture d'un suivi par son id déterministe
+ * ({@code followerId + ":" + followedId}) ; abonnements/abonnés/compteurs via
+ * {@code POST /search} (filtres {@code followerId} / {@code followedId}).
  */
 @RestController
 @RequestMapping(UserFollowerController.ENDPOINT)
@@ -33,15 +34,18 @@ public class UserFollowerController {
     private final FollowUserUseCase followUserUseCase;
     private final UnfollowUserUseCase unfollowUserUseCase;
     private final SearchUserFollowerUseCase searchUserFollowerUseCase;
+    private final GetUserFollowerUseCase getUserFollowerUseCase;
 
     public UserFollowerController(
             FollowUserUseCase followUserUseCase,
             UnfollowUserUseCase unfollowUserUseCase,
-            SearchUserFollowerUseCase searchUserFollowerUseCase
+            SearchUserFollowerUseCase searchUserFollowerUseCase,
+            GetUserFollowerUseCase getUserFollowerUseCase
     ) {
         this.followUserUseCase = followUserUseCase;
         this.unfollowUserUseCase = unfollowUserUseCase;
         this.searchUserFollowerUseCase = searchUserFollowerUseCase;
+        this.getUserFollowerUseCase = getUserFollowerUseCase;
     }
 
     @PostMapping("/search")
@@ -56,6 +60,16 @@ public class UserFollowerController {
                 .thenApply(ResponseEntity::ok);
     }
 
+    /**
+     * Lire un suivi par son id déterministe ({@code followerId:followedId}).
+     */
+    @GetMapping("/{followId}")
+    public CompletableFuture<ResponseEntity<UserFollowerResponse>> getById(@PathVariable String followId) {
+        return getUserFollowerUseCase.getById(followId)
+                .thenApply(UserFollowerResponseMapper::toResponse)
+                .thenApply(ResponseEntity::ok);
+    }
+
     @PostMapping
     public CompletableFuture<ResponseEntity<IdResponse>> follow(@RequestBody FollowUserRequest request) {
         String followerId = SecurityHelper.getUserId();
@@ -65,8 +79,8 @@ public class UserFollowerController {
     }
 
     @DeleteMapping("/{followId}")
-    public CompletableFuture<ResponseEntity<IdResponse>> unfollow(@PathVariable String followId) {
+    public CompletableFuture<ResponseEntity<Void>> unfollow(@PathVariable String followId) {
         return unfollowUserUseCase.unfollow(followId)
-                .thenApply(_ -> ResponseEntityBuilder.ok(followId));
+                .thenApply(_ -> ResponseEntityBuilder.noContent());
     }
 }

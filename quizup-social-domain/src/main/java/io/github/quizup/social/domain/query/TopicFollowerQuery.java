@@ -15,4 +15,9 @@ public interface TopicFollowerQuery {
             PageCriteria page
     ) implements TopicFollowerQuery, SearchQuery {
     }
+
+    record GetTopicFollowerByIdQuery(
+            String followId
+    ) implements TopicFollowerQuery {
+    }
 }

@@ -36,6 +36,7 @@ public class ChallengeController {
     private final CreateChallengeUseCase createChallengeUseCase;
     private final AcceptChallengeUseCase acceptChallengeUseCase;
     private final DeclineChallengeUseCase declineChallengeUseCase;
+    private final CancelChallengeUseCase cancelChallengeUseCase;
     private final GetChallengeUseCase getChallengeUseCase;
     private final SearchChallengeUseCase searchChallengeUseCase;
     private final RegisterChallengeRunUseCase registerChallengeRunUseCase;
@@ -43,12 +44,14 @@ public class ChallengeController {
     public ChallengeController(CreateChallengeUseCase createChallengeUseCase,
                                AcceptChallengeUseCase acceptChallengeUseCase,
                                DeclineChallengeUseCase declineChallengeUseCase,
+                               CancelChallengeUseCase cancelChallengeUseCase,
                                GetChallengeUseCase getChallengeUseCase,
                                SearchChallengeUseCase searchChallengeUseCase,
                                RegisterChallengeRunUseCase registerChallengeRunUseCase) {
         this.createChallengeUseCase = createChallengeUseCase;
         this.acceptChallengeUseCase = acceptChallengeUseCase;
         this.declineChallengeUseCase = declineChallengeUseCase;
+        this.cancelChallengeUseCase = cancelChallengeUseCase;
         this.getChallengeUseCase = getChallengeUseCase;
         this.searchChallengeUseCase = searchChallengeUseCase;
         this.registerChallengeRunUseCase = registerChallengeRunUseCase;
@@ -99,7 +102,21 @@ public class ChallengeController {
     }
 
     /**
-     * Enregistrer le run asynchrone du joueur connecté (jeu en différé).
+     * Annuler un défi (par son instigateur, tant qu'il est en attente) — transition d'état sur
+     * l'agrégat, donc {@code POST /{id}/cancel} (jamais un {@code DELETE} : la ressource n'est pas
+     * supprimée, son statut passe à {@code CANCELED}).
+     */
+    @PostMapping("/{challengeId}/cancel")
+    public CompletableFuture<ResponseEntity<IdResponse>> cancelChallenge(
+            @PathVariable String challengeId) {
+        return cancelChallengeUseCase.cancel(challengeId, SecurityHelper.getUserId())
+                .thenApply(ResponseEntityBuilder::ok);
+    }
+
+    /**
+     * Enregistrer le run asynchrone du joueur connecté (jeu en différé) — action sur l'agrégat
+     * défi (le run n'est pas une ressource adressable : ses ids sont exposés par
+     * {@link ChallengeResponse}). Réponse {@code 200 IdResponse(gameId)}.
      */
     @PostMapping("/{challengeId}/runs")
     public CompletableFuture<ResponseEntity<IdResponse>> registerRun(

@@ -36,17 +36,25 @@ Gestion des relations sociales entre joueurs :
 | POST    | `/api/challenges`                       | `createChallenge(CreateChallengeRequest)` | `IdResponse`                      |
 | POST    | `/api/challenges/{challengeId}/accept`  | `acceptChallenge(String)`                 | `IdResponse`                      |
 | POST    | `/api/challenges/{challengeId}/decline` | `declineChallenge(String)`                | `IdResponse`                      |
-| POST    | `/api/challenges/{challengeId}/runs`    | `registerRun(String, RegisterChallengeRunRequest)` | `IdResponse`             |
+| POST    | `/api/challenges/{challengeId}/cancel`  | `cancelChallenge(String)`                 | `IdResponse`                      |
+| POST    | `/api/challenges/{challengeId}/runs`    | `registerRun(String, RegisterChallengeRunRequest)` | `IdResponse`              |
 | GET     | `/api/challenges/{challengeId}`         | `getChallengeById(String)`                | `ChallengeResponse`               |
 
-**Autorisation** : `accept`/`decline` sont réservés au **joueur défié** (l'acteur `SecurityHelper.getUserId()`
-est porté par la commande ; l'agrégat rejette tout autre appelant via `UnauthorizedChallengeActionProblem`).
+**Annulation** : `POST /api/challenges/{challengeId}/cancel` (par l'`challengerId`, tant que
+`PENDING`) — c'est une **transition d'état** (`→ CANCELED`), pas une suppression de ressource
+(cf. `best-practices/.backend/rest-api.md` § transitions).
 
-**Runs asynchrones** : chaque participant peut enregistrer le `gameId` de son run
-(`POST /runs`, joueur issu du JWT). `ChallengeResponse` expose `challengerGameId` /
-`challengedGameId` / `replayGameId` ; le premier run enregistré sert de référence au replay de
-l'adversaire (mêmes questions), et le **second run** enregistré est le `replayGameId` (résultat
-autoritaire). Le `gameId` « synchrone » reste celui créé à l'acceptation.
+**Autorisation** : `accept`/`decline` sont réservés au **joueur défié**, `cancel` au **joueur
+instigateur** (`challengerId`), tant que le défi est `PENDING` (l'acteur `SecurityHelper.getUserId()`
+est porté par la commande ; l'agrégat rejette tout autre appelant via `UnauthorizedChallengeActionProblem`,
+et tout appel hors `PENDING` via `ChallengeNotPendingProblem`).
+
+**Runs asynchrones** : chaque participant enregistre le `gameId` de son run via
+`POST /api/challenges/{challengeId}/runs` (action sur l'agrégat, joueur issu du JWT) → `200
+IdResponse(gameId)`. Le run n'est **pas** une ressource adressable : ses ids sont exposés par
+`ChallengeResponse` (`challengerGameId` / `challengedGameId` / `replayGameId`). Le premier run
+enregistré sert de référence au replay de l'adversaire (mêmes questions), le **second** est le
+`replayGameId` (résultat autoritaire) ; le `gameId` « synchrone » reste celui créé à l'acceptation.
 
 ### `TopicFollowerController` — `/api/topic-follows`
 
@@ -60,11 +68,13 @@ idempotente et rejouable.
 | Méthode | Chemin                          | Handler                          | Response                              |
 |---------|---------------------------------|----------------------------------|---------------------------------------|
 | POST    | `/api/topic-follows/search`     | `search(SearchRequest)`          | `PageResponse<TopicFollowerResponse>` |
-| POST    | `/api/topic-follows`            | `follow(FollowTopicRequest)`     | `IdResponse`                          |
-| DELETE  | `/api/topic-follows/{followId}` | `unfollow(String)`               | `IdResponse`                          |
+| GET     | `/api/topic-follows/{followId}` | `getById(String)`                | `TopicFollowerResponse` / 404         |
+| POST    | `/api/topic-follows`            | `follow(FollowTopicRequest)`     | `201 + Location`                      |
+| DELETE  | `/api/topic-follows/{followId}` | `unfollow(String)`               | `204 No Content`                      |
 
-**Pas d'endpoint de vérification** : le client détermine ce que suit l'utilisateur via
-`POST /search` (filtres `topicId` / `userId`).
+**Lecture par id** : le client lit l'état de suivi par l'id déterministe
+`userId + ":" + topicId` via `GET /{followId}` (plus de recherche filtrée pour un suivi précis —
+cf. `best-practices/.backend/rest-api.md`).
 
 ### `UserFollowerController` — `/api/user-follows`
 
@@ -77,21 +87,25 @@ l'état de suivi. On ne peut pas se suivre soi-même.
 | Méthode | Chemin                                | Handler                     | Response                             |
 |---------|---------------------------------------|-----------------------------|--------------------------------------|
 | POST    | `/api/user-follows/search`            | `search(SearchRequest)`     | `PageResponse<UserFollowerResponse>` |
-| POST    | `/api/user-follows` (`{followedId}`)  | `follow(FollowUserRequest)` | `IdResponse`                         |
-| DELETE  | `/api/user-follows/{followId}`        | `unfollow(String)`          | `IdResponse`                         |
+| GET     | `/api/user-follows/{followId}`        | `getById(String)`           | `UserFollowerResponse` / 404         |
+| POST    | `/api/user-follows` (`{followedId}`)  | `follow(FollowUserRequest)` | `201 + Location`                     |
+| DELETE  | `/api/user-follows/{followId}`        | `unfollow(String)`          | `204 No Content`                     |
 
-**Abonnements / abonnés / compteurs** ne sont pas des endpoints dédiés : le client interroge
-`POST /search` avec les filtres `followerId` (mes abonnements) ou `followedId` (mes abonnés) et lit
-`totalElements` pour les compteurs.
+**Lecture par id** : état de suivi lu par l'id déterministe `followerId + ":" + followedId`
+via `GET /{followId}`. **Abonnements / abonnés / compteurs** : `POST /search` avec les filtres
+`followerId` (mes abonnements) ou `followedId` (mes abonnés), `totalElements` pour les compteurs.
 
 ---
 
 ## 3. Use cases (ports entrants — `domain/port/in/`)
 
 - Challenges : `CreateChallengeUseCase`, `AcceptChallengeUseCase`, `DeclineChallengeUseCase`,
-  `GetChallengeUseCase`, `SearchChallengeUseCase`
-- Topic followers : `FollowTopicUseCase`, `UnfollowTopicUseCase`, `SearchTopicFollowerUseCase`
-- User followers : `FollowUserUseCase`, `UnfollowUserUseCase`, `SearchUserFollowerUseCase`
+  `CancelChallengeUseCase`, `RegisterChallengeRunUseCase`, `GetChallengeUseCase`,
+  `SearchChallengeUseCase`
+- Topic followers : `FollowTopicUseCase`, `UnfollowTopicUseCase`, `GetTopicFollowerUseCase`,
+  `SearchTopicFollowerUseCase`
+- User followers : `FollowUserUseCase`, `UnfollowUserUseCase`, `GetUserFollowerUseCase`,
+  `SearchUserFollowerUseCase`
 
 ---
 

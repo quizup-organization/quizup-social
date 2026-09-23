@@ -38,4 +38,3 @@ public class ChallengeQueryHandler {
         return challengeRepositoryPort.findAll(query);
     }
 }
-

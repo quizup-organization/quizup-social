@@ -17,6 +17,7 @@ public interface SocialNotification {
         CHALLENGE_RECEIVED,
         CHALLENGE_ACCEPTED,
         CHALLENGE_DECLINED,
+        CHALLENGE_CANCELED,
         CHALLENGE_EXPIRED
     }
 
@@ -55,6 +56,18 @@ public interface SocialNotification {
         @Override
         public SocialNotificationType type() {
             return SocialNotificationType.CHALLENGE_DECLINED;
+        }
+    }
+
+    record ChallengeCanceledNotification(
+            String challengeId,
+            String canceledBy,
+            String userId,
+            String timestamp
+    ) implements SocialNotification {
+        @Override
+        public SocialNotificationType type() {
+            return SocialNotificationType.CHALLENGE_CANCELED;
         }
     }
 

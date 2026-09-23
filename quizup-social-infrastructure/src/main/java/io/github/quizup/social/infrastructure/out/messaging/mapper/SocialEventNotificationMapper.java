@@ -49,6 +49,14 @@ public final class SocialEventNotificationMapper {
                             e.expiredAt().toString()
                     )
             );
+            case ChallengeEvent.ChallengeCanceledEvent e -> Optional.of(
+                    new SocialNotification.ChallengeCanceledNotification(
+                            e.challengeId(),
+                            e.challengerId(),
+                            e.challengedId(),
+                            e.canceledAt().toString()
+                    )
+            );
             default -> Optional.empty();
         };
     }

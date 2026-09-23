@@ -81,6 +81,18 @@ public class ChallengeProjection {
 
     @EventHandler
     @Transactional
+    public void on(ChallengeEvent.ChallengeCanceledEvent event) {
+        logger.debug("Projecting ChallengeCanceledEvent: challengeId={}", event.challengeId());
+
+        challengeRepositoryPort.findById(event.challengeId()).ifPresent(challenge ->
+                challengeRepositoryPort.save(challenge.toBuilder()
+                        .status(ChallengeStatus.CANCELED)
+                        .build())
+        );
+    }
+
+    @EventHandler
+    @Transactional
     public void on(ChallengeEvent.ChallengeExpiredEvent event) {
         logger.debug("Projecting ChallengeExpiredEvent: challengeId={}", event.challengeId());
 

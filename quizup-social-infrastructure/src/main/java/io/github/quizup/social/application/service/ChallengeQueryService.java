@@ -10,7 +10,6 @@ import io.github.quizup.microservice.core.domain.model.search.PageResult;
 import org.axonframework.queryhandling.QueryGateway;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -36,4 +35,3 @@ public class ChallengeQueryService implements GetChallengeUseCase, SearchChallen
         return queryGateway.query(query, QueryResponseTypes.pageResultOf(Challenge.class));
     }
 }
-

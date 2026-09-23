@@ -29,6 +29,17 @@ public interface ChallengeEvent {
     }
 
     /**
+     * Event publié quand un défi est annulé par son instigateur (avant acceptation).
+     */
+    record ChallengeCanceledEvent(
+            String challengeId,
+            String challengerId,
+            String challengedId,
+            Instant canceledAt
+    ) implements ChallengeEvent {
+    }
+
+    /**
      * Event publié quand un défi est créé.
      * Pas de gameId ici — la partie n'est créée que quand le défi est accepté.
      */

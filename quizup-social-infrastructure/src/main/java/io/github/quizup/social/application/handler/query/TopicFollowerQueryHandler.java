@@ -1,6 +1,7 @@
 package io.github.quizup.social.application.handler.query;
 
 import io.github.quizup.microservice.core.domain.model.search.PageResult;
+import io.github.quizup.social.domain.exception.SocialExceptions;
 import io.github.quizup.social.domain.model.TopicFollower;
 import io.github.quizup.social.domain.port.out.TopicFollowerRepositoryPort;
 import io.github.quizup.social.domain.query.TopicFollowerQuery;
@@ -19,5 +20,11 @@ public class TopicFollowerQueryHandler {
     @QueryHandler
     public PageResult<TopicFollower> handle(TopicFollowerQuery.SearchTopicFollowerQuery query) {
         return topicFollowerRepositoryPort.findAll(query);
+    }
+
+    @QueryHandler
+    public TopicFollower handle(TopicFollowerQuery.GetTopicFollowerByIdQuery query) {
+        return topicFollowerRepositoryPort.findById(query.followId())
+                .orElseThrow(() -> new SocialExceptions.TopicFollowerNotFoundProblem(query.followId()));
     }
 }

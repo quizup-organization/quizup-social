@@ -44,6 +44,15 @@ public interface ChallengeCommand {
     }
 
     /**
+     * Command pour annuler un défi (par le joueur qui l'a lancé, tant qu'il est en attente).
+     */
+    record CancelChallengeCommand(
+            @TargetAggregateIdentifier String challengeId,
+            String playerId
+    ) implements ChallengeCommand {
+    }
+
+    /**
      * Enregistre le run asynchrone d'un participant (jeu en différé). Le premier run
      * enregistré sert de référence au replay de l'adversaire.
      */

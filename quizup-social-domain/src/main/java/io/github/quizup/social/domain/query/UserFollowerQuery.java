@@ -15,4 +15,9 @@ public interface UserFollowerQuery {
             PageCriteria page
     ) implements UserFollowerQuery, SearchQuery {
     }
+
+    record GetUserFollowerByIdQuery(
+            String followId
+    ) implements UserFollowerQuery {
+    }
 }
