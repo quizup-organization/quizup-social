@@ -1,3 +1,9 @@
+## [1.7.2](https://github.com/quizup-organization/quizup-social/compare/v1.7.1...v1.7.2) (2026-09-24)
+
+### Bug Fixes
+
+* **deps:** bump quizup-parent to 2.4.3 (bus-only search criteria type info) ([b400084](https://github.com/quizup-organization/quizup-social/commit/b4000847da93f9de9b8a243843857066125651a9))
+
 ## [1.7.1](https://github.com/quizup-organization/quizup-social/compare/v1.7.0...v1.7.1) (2026-09-24)
 
 ### Bug Fixes
