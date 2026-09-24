@@ -1,3 +1,9 @@
+## [1.7.3](https://github.com/quizup-organization/quizup-social/compare/v1.7.2...v1.7.3) (2026-09-24)
+
+### Bug Fixes
+
+* **deps:** bump quizup-parent to 2.4.4 (typed PageResult over query transport) ([b1ad3ca](https://github.com/quizup-organization/quizup-social/commit/b1ad3caca91df5f09242187c5f3ad678155894cf))
+
 ## [1.7.2](https://github.com/quizup-organization/quizup-social/compare/v1.7.1...v1.7.2) (2026-09-24)
 
 ### Bug Fixes
