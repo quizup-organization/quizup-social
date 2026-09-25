@@ -1,3 +1,15 @@
+## [2.0.0](https://github.com/quizup-organization/quizup-social/compare/v1.7.3...v2.0.0) (2026-09-25)
+
+### ⚠ BREAKING CHANGES
+
+* **social:** the service no longer exposes its REST API nor WebSocket
+(the BFF is the sole surface); search use cases now use the SDK SearchRequest/
+SearchResponse DTOs.
+
+### Features
+
+* **social:** headless service (REST + WS removed) + SDK search contracts ([5168e4c](https://github.com/quizup-organization/quizup-social/commit/5168e4c6b83a3f60d5cf2d69cad4bba11d4b0f8e))
+
 ## [1.7.3](https://github.com/quizup-organization/quizup-social/compare/v1.7.2...v1.7.3) (2026-09-24)
 
 ### Bug Fixes
