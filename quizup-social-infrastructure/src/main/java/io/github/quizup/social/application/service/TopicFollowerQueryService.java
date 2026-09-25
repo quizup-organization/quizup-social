@@ -1,7 +1,7 @@
 package io.github.quizup.social.application.service;
 
 import io.github.quizup.microservice.core.infrastructure.axon.QueryResponseTypes;
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.social.domain.model.TopicFollower;
 import io.github.quizup.social.domain.port.in.GetTopicFollowerUseCase;
 import io.github.quizup.social.domain.port.in.SearchTopicFollowerUseCase;
@@ -21,8 +21,8 @@ public class TopicFollowerQueryService implements SearchTopicFollowerUseCase, Ge
     }
 
     @Override
-    public CompletableFuture<PageResult<TopicFollower>> search(TopicFollowerQuery.SearchTopicFollowerQuery query) {
-        return queryGateway.query(query, QueryResponseTypes.pageResultOf(TopicFollower.class));
+    public CompletableFuture<SearchResponse<TopicFollower>> search(TopicFollowerQuery.SearchTopicFollowerQuery query) {
+        return queryGateway.query(query, QueryResponseTypes.searchResponseOf(TopicFollower.class));
     }
 
     @Override

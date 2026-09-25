@@ -4,7 +4,7 @@ import io.github.quizup.social.domain.exception.ChallengeExceptions;
 import io.github.quizup.social.domain.model.Challenge;
 import io.github.quizup.social.domain.port.out.ChallengeRepositoryPort;
 import io.github.quizup.social.domain.query.ChallengeQuery;
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import org.axonframework.queryhandling.QueryHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +33,8 @@ public class ChallengeQueryHandler {
     }
 
     @QueryHandler
-    public PageResult<Challenge> handle(ChallengeQuery.SearchChallengeQuery query) {
+    public SearchResponse<Challenge> handle(ChallengeQuery.SearchChallengeQuery query) {
         logger.debug("Handling SearchChallengeQuery: query={}", query);
-        return challengeRepositoryPort.findAll(query);
+        return challengeRepositoryPort.findAll(query.request());
     }
 }

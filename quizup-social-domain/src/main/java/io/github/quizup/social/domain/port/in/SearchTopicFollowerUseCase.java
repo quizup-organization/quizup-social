@@ -1,24 +1,17 @@
 package io.github.quizup.social.domain.port.in;
 
-import io.github.quizup.microservice.core.domain.model.search.FilterCriteria;
-import io.github.quizup.microservice.core.domain.model.search.PageCriteria;
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
-import io.github.quizup.microservice.core.domain.model.search.SortCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.social.domain.model.TopicFollower;
 import io.github.quizup.social.domain.query.TopicFollowerQuery;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface SearchTopicFollowerUseCase {
-    CompletableFuture<PageResult<TopicFollower>> search(TopicFollowerQuery.SearchTopicFollowerQuery query);
 
-    default CompletableFuture<PageResult<TopicFollower>> search(
-            List<FilterCriteria> filters,
-            List<SortCriteria> sorts,
-            PageCriteria page
-    ) {
-        return search(new TopicFollowerQuery.SearchTopicFollowerQuery(filters, sorts, page));
+    CompletableFuture<SearchResponse<TopicFollower>> search(TopicFollowerQuery.SearchTopicFollowerQuery query);
+
+    default CompletableFuture<SearchResponse<TopicFollower>> search(SearchRequest request) {
+        return search(new TopicFollowerQuery.SearchTopicFollowerQuery(request));
     }
 }
-

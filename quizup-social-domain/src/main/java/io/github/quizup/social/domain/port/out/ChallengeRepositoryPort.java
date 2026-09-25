@@ -1,8 +1,8 @@
 package io.github.quizup.social.domain.port.out;
 
 import io.github.quizup.social.domain.model.Challenge;
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
-import io.github.quizup.microservice.core.domain.model.search.SearchCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 
 import java.util.Optional;
 
@@ -21,6 +21,6 @@ public interface ChallengeRepositoryPort {
      */
     Optional<Challenge> findById(String challengeId);
 
-    PageResult<Challenge> findAll(SearchCriteria criteria);
+    SearchResponse<Challenge> findAll(SearchRequest request);
 }
 

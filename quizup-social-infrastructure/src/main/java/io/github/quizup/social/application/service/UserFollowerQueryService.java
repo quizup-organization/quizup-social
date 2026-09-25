@@ -1,7 +1,7 @@
 package io.github.quizup.social.application.service;
 
 import io.github.quizup.microservice.core.infrastructure.axon.QueryResponseTypes;
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.social.domain.model.UserFollower;
 import io.github.quizup.social.domain.port.in.GetUserFollowerUseCase;
 import io.github.quizup.social.domain.port.in.SearchUserFollowerUseCase;
@@ -21,8 +21,8 @@ public class UserFollowerQueryService implements SearchUserFollowerUseCase, GetU
     }
 
     @Override
-    public CompletableFuture<PageResult<UserFollower>> search(UserFollowerQuery.SearchUserFollowerQuery query) {
-        return queryGateway.query(query, QueryResponseTypes.pageResultOf(UserFollower.class));
+    public CompletableFuture<SearchResponse<UserFollower>> search(UserFollowerQuery.SearchUserFollowerQuery query) {
+        return queryGateway.query(query, QueryResponseTypes.searchResponseOf(UserFollower.class));
     }
 
     @Override

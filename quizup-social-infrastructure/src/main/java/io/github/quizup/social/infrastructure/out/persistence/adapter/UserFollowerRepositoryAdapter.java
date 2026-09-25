@@ -1,7 +1,7 @@
 package io.github.quizup.social.infrastructure.out.persistence.adapter;
 
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
-import io.github.quizup.microservice.core.domain.model.search.SearchCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 import io.github.quizup.microservice.core.infrastructure.adapter.AnnotationSearchableEntity;
 import io.github.quizup.microservice.core.infrastructure.adapter.JpaSearchAdapter;
 import io.github.quizup.social.domain.model.UserFollower;
@@ -49,8 +49,8 @@ public class UserFollowerRepositoryAdapter implements UserFollowerRepositoryPort
     }
 
     @Override
-    public PageResult<UserFollower> findAll(SearchCriteria searchCriteria) {
-        return userFollowerSearchAdapter.findAll(searchCriteria)
+    public SearchResponse<UserFollower> findAll(SearchRequest request) {
+        return userFollowerSearchAdapter.findAll(request)
                 .map(UserFollowerEntityMapper::toDomain);
     }
 }

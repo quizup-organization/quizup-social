@@ -1,7 +1,7 @@
 package io.github.quizup.social.domain.port.out;
 
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
-import io.github.quizup.microservice.core.domain.model.search.SearchCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 import io.github.quizup.social.domain.model.TopicFollower;
 
 import java.util.Optional;
@@ -16,5 +16,5 @@ public interface TopicFollowerRepositoryPort {
 
     boolean exists(String topicId, String userId);
 
-    PageResult<TopicFollower> findAll(SearchCriteria searchCriteria);
+    SearchResponse<TopicFollower> findAll(SearchRequest request);
 }

@@ -1,23 +1,12 @@
 package io.github.quizup.social.domain.query;
 
-import io.github.quizup.microservice.core.domain.model.search.FilterCriteria;
-import io.github.quizup.microservice.core.domain.model.search.PageCriteria;
-import io.github.quizup.microservice.core.domain.model.search.SortCriteria;
-import io.github.quizup.microservice.core.domain.query.SearchQuery;
-
-import java.util.List;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 
 public interface ChallengeQuery {
 
-    record SearchChallengeQuery(
-            List<FilterCriteria> filters,
-            List<SortCriteria> sorts,
-            PageCriteria page
-    ) implements ChallengeQuery, SearchQuery {
+    record SearchChallengeQuery(SearchRequest request) implements ChallengeQuery {
     }
 
-    record GetChallengeByIdQuery(
-            String challengeId
-    ) implements ChallengeQuery {
+    record GetChallengeByIdQuery(String challengeId) implements ChallengeQuery {
     }
 }

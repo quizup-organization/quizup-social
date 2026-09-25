@@ -6,7 +6,7 @@ import io.github.quizup.social.domain.model.Challenge;
 import io.github.quizup.social.domain.port.in.GetChallengeUseCase;
 import io.github.quizup.social.domain.port.in.SearchChallengeUseCase;
 import io.github.quizup.social.domain.query.ChallengeQuery;
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import org.axonframework.queryhandling.QueryGateway;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +31,7 @@ public class ChallengeQueryService implements GetChallengeUseCase, SearchChallen
     }
 
     @Override
-    public CompletableFuture<PageResult<Challenge>> search(ChallengeQuery.SearchChallengeQuery query) {
-        return queryGateway.query(query, QueryResponseTypes.pageResultOf(Challenge.class));
+    public CompletableFuture<SearchResponse<Challenge>> search(ChallengeQuery.SearchChallengeQuery query) {
+        return queryGateway.query(query, QueryResponseTypes.searchResponseOf(Challenge.class));
     }
 }

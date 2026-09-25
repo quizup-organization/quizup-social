@@ -5,8 +5,8 @@ import io.github.quizup.social.domain.port.out.ChallengeRepositoryPort;
 import io.github.quizup.social.infrastructure.out.persistence.entity.ChallengeEntity;
 import io.github.quizup.social.infrastructure.out.persistence.mapper.ChallengeEntityMapper;
 import io.github.quizup.social.infrastructure.out.persistence.repository.ChallengeJpaRepository;
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
-import io.github.quizup.microservice.core.domain.model.search.SearchCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 import io.github.quizup.microservice.core.infrastructure.adapter.AnnotationSearchableEntity;
 import io.github.quizup.microservice.core.infrastructure.adapter.JpaSearchAdapter;
 import org.springframework.stereotype.Component;
@@ -42,8 +42,8 @@ public class ChallengeRepositoryAdapter implements ChallengeRepositoryPort {
     }
 
     @Override
-    public PageResult<Challenge> findAll(SearchCriteria criteria) {
-        return challengeJpaSearchAdapter.findAll(criteria)
+    public SearchResponse<Challenge> findAll(SearchRequest request) {
+        return challengeJpaSearchAdapter.findAll(request)
                 .map(ChallengeEntityMapper::toDomain);
     }
 

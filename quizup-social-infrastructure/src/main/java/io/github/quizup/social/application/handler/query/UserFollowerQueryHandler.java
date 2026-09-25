@@ -1,6 +1,6 @@
 package io.github.quizup.social.application.handler.query;
 
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.social.domain.exception.SocialExceptions;
 import io.github.quizup.social.domain.model.UserFollower;
 import io.github.quizup.social.domain.port.out.UserFollowerRepositoryPort;
@@ -18,8 +18,8 @@ public class UserFollowerQueryHandler {
     }
 
     @QueryHandler
-    public PageResult<UserFollower> handle(UserFollowerQuery.SearchUserFollowerQuery query) {
-        return userFollowerRepositoryPort.findAll(query);
+    public SearchResponse<UserFollower> handle(UserFollowerQuery.SearchUserFollowerQuery query) {
+        return userFollowerRepositoryPort.findAll(query.request());
     }
 
     @QueryHandler
