@@ -14,7 +14,8 @@ public interface TopicFollowerCommand {
     }
 
     record UnfollowTopicCommand(
-            @TargetAggregateIdentifier String followId
+            @TargetAggregateIdentifier String followId,
+            String actorId
     ) implements TopicFollowerCommand {
     }
 }

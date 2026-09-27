@@ -9,7 +9,8 @@ import java.time.Instant;
  *
  * <p>{@code gameId} porte la partie synchrone créée à l'acceptation. Pour un duel asynchrone,
  * {@code challengerGameId} / {@code challengedGameId} portent les runs enregistrés par chaque
- * joueur (le second rejouant le premier).</p>
+ * joueur (le second rejouant le premier). Une fois les deux résultats connus, le défi passe
+ * {@code COMPLETED} avec {@code winnerId} (null en cas d'égalité) et les scores des deux runs.</p>
  */
 @Builder(toBuilder = true)
 public record Challenge(
@@ -25,6 +26,10 @@ public record Challenge(
         Instant createdAt,
         Instant acceptedAt,
         Instant declinedAt,
-        Instant expiresAt
+        Instant expiresAt,
+        Integer challengerScore,
+        Integer challengedScore,
+        String winnerId,
+        Instant completedAt
 ) {
 }

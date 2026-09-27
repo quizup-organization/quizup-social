@@ -53,6 +53,18 @@ public class ChallengeEntity {
     @Column(name = "replay_game_id")
     private String replayGameId;
 
+    @Column(name = "challenger_score")
+    private Integer challengerScore;
+
+    @Column(name = "challenged_score")
+    private Integer challengedScore;
+
+    @Column(name = "winner_id", length = 255)
+    private String winnerId;
+
+    @Column(name = "completed_at")
+    private Instant completedAt;
+
     @Searchable(type = FieldType.STRING)
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)

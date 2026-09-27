@@ -25,7 +25,11 @@ public final class ChallengeEntityMapper {
                 entity.getCreatedAt(),
                 entity.getAcceptedAt(),
                 entity.getDeclinedAt(),
-                entity.getExpiresAt()
+                entity.getExpiresAt(),
+                entity.getChallengerScore(),
+                entity.getChallengedScore(),
+                entity.getWinnerId(),
+                entity.getCompletedAt()
         );
     }
 
@@ -44,6 +48,10 @@ public final class ChallengeEntityMapper {
         entity.setAcceptedAt(challenge.acceptedAt());
         entity.setDeclinedAt(challenge.declinedAt());
         entity.setExpiresAt(challenge.expiresAt());
+        entity.setChallengerScore(challenge.challengerScore());
+        entity.setChallengedScore(challenge.challengedScore());
+        entity.setWinnerId(challenge.winnerId());
+        entity.setCompletedAt(challenge.completedAt());
         return entity;
     }
 }

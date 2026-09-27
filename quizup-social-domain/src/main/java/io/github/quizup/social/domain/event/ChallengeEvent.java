@@ -78,4 +78,32 @@ public interface ChallengeEvent {
             Instant registeredAt
     ) implements ChallengeEvent {
     }
+
+    /**
+     * Event publié quand le score final d'un run asynchrone est connu.
+     */
+    record ChallengeRunResultRecordedEvent(
+            String challengeId,
+            String challengerId,
+            String challengedId,
+            String playerId,
+            int score,
+            Instant recordedAt
+    ) implements ChallengeEvent {
+    }
+
+    /**
+     * Event publié quand un défi est terminé (deux runs connus, ou partie synchrone terminée).
+     * {@code winnerId} vaut {@code null} en cas d'égalité.
+     */
+    record ChallengeCompletedEvent(
+            String challengeId,
+            String challengerId,
+            String challengedId,
+            String winnerId,
+            int challengerScore,
+            int challengedScore,
+            Instant completedAt
+    ) implements ChallengeEvent {
+    }
 }

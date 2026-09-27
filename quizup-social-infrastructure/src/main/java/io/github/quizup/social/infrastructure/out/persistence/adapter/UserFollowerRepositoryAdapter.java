@@ -9,8 +9,10 @@ import io.github.quizup.social.domain.port.out.UserFollowerRepositoryPort;
 import io.github.quizup.social.infrastructure.out.persistence.entity.UserFollowerEntity;
 import io.github.quizup.social.infrastructure.out.persistence.mapper.UserFollowerEntityMapper;
 import io.github.quizup.social.infrastructure.out.persistence.repository.UserFollowerJpaRepository;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -52,5 +54,29 @@ public class UserFollowerRepositoryAdapter implements UserFollowerRepositoryPort
     public SearchResponse<UserFollower> findAll(SearchRequest request) {
         return userFollowerSearchAdapter.findAll(request)
                 .map(UserFollowerEntityMapper::toDomain);
+    }
+
+    @Override
+    public long countFollowing(String userId) {
+        return userFollowerJpaRepository.countByFollowerId(userId);
+    }
+
+    @Override
+    public long countFollowers(String userId) {
+        return userFollowerJpaRepository.countByFollowedId(userId);
+    }
+
+    @Override
+    public List<UserFollower> findFollowing(String followerId, int limit) {
+        return userFollowerJpaRepository.findByFollowerIdOrderByFollowedAtDesc(followerId, Limit.of(limit)).stream()
+                .map(UserFollowerEntityMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<UserFollower> findFollowers(String followedId, int limit) {
+        return userFollowerJpaRepository.findByFollowedIdOrderByFollowedAtDesc(followedId, Limit.of(limit)).stream()
+                .map(UserFollowerEntityMapper::toDomain)
+                .toList();
     }
 }

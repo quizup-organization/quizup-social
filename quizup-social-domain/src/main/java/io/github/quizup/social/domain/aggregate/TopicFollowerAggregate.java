@@ -2,6 +2,7 @@ package io.github.quizup.social.domain.aggregate;
 
 import io.github.quizup.social.domain.command.TopicFollowerCommand;
 import io.github.quizup.social.domain.event.TopicFollowerEvent;
+import io.github.quizup.social.domain.exception.SocialExceptions;
 import lombok.Getter;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -55,11 +56,14 @@ public class TopicFollowerAggregate {
         );
     }
 
-    /** Désabonnement idempotent (no-op si déjà désabonné). */
+    /** Désabonnement idempotent (no-op si déjà désabonné) ; réservé au propriétaire du suivi. */
     @CommandHandler
     public void handle(TopicFollowerCommand.UnfollowTopicCommand command) {
         if (!followed) {
             return;
+        }
+        if (!this.userId.equals(command.actorId())) {
+            throw new SocialExceptions.NotFollowOwnerProblem(this.followId, command.actorId());
         }
         AggregateLifecycle.apply(
                 new TopicFollowerEvent.TopicUnfollowedEvent(

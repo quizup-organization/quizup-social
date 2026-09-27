@@ -3,6 +3,7 @@ package io.github.quizup.social.domain.aggregate;
 import io.github.quizup.axon.test.QuizUpAxonMatchers;
 import io.github.quizup.social.domain.command.TopicFollowerCommand;
 import io.github.quizup.social.domain.event.TopicFollowerEvent;
+import io.github.quizup.social.domain.exception.SocialExceptions;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.junit.jupiter.api.Test;
 
@@ -57,7 +58,25 @@ class TopicFollowerAggregateTest {
                         "user-1:topic-1", "topic-1", "user-1", Instant.now()),
                         new TopicFollowerEvent.TopicUnfollowedEvent(
                                 "user-1:topic-1", "topic-1", "user-1", Instant.now()))
-                .when(new TopicFollowerCommand.UnfollowTopicCommand("user-1:topic-1"))
+                .when(new TopicFollowerCommand.UnfollowTopicCommand("user-1:topic-1", "user-1"))
                 .expectNoEvents();
+    }
+
+    @Test
+    void unfollowTopic_byOwner_appliesTopicUnfollowedEvent() {
+        fixture.given(new TopicFollowerEvent.TopicFollowedEvent(
+                        "user-1:topic-1", "topic-1", "user-1", Instant.now()))
+                .when(new TopicFollowerCommand.UnfollowTopicCommand("user-1:topic-1", "user-1"))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        TopicFollowerEvent.TopicUnfollowedEvent.class,
+                        e -> ((TopicFollowerEvent.TopicUnfollowedEvent) e).followId().equals("user-1:topic-1")));
+    }
+
+    @Test
+    void unfollowTopic_byAnotherUser_isRejected() {
+        fixture.given(new TopicFollowerEvent.TopicFollowedEvent(
+                        "user-1:topic-1", "topic-1", "user-1", Instant.now()))
+                .when(new TopicFollowerCommand.UnfollowTopicCommand("user-1:topic-1", "user-2"))
+                .expectException(SocialExceptions.NotFollowOwnerProblem.class);
     }
 }

@@ -48,7 +48,7 @@ exposée par le service.
 
 | Port out    | Service cible     | Query Axon envoyée (QueryGateway)                          |
 |-------------|-------------------|------------------------------------------------------------|
-| `ProfileRepositoryPort`  | `quizup-profile`    | `ProfileQuery.ProfileExistsByIdQuery`, `ProfileQuery.FindProfileQuery` |
+| `ProfileRepositoryPort`  | `quizup-profile`    | `ProfileQuery.ProfileExistsByIdQuery`, `ProfileQuery.GetProfileQuery` |
 
 Implémentation dans `application/service/` : `ProfileService`
 (→ profile, nom via `Profile::displayName`).
@@ -62,8 +62,31 @@ Implémentation dans `application/service/` : `ProfileService`
 
 ### Fourniture (sortant)
 
-- `UserFollowerQuery.SearchUserFollowerQuery` (filtre `followerId`) : consommée par
-  `quizup-leaderboard` (portée « abonnements » du classement) — **réutilise la recherche**, pas de
-  query dédiée.
-- Follows (topics et joueurs) : lecture **exclusivement via `POST /search`** + filtres (calcul client).
+- **Queries dédiées aux vues BFF** (le BFF ne compose plus de page à partir du search) :
+  - `ChallengeQuery.GetChallengeBoxQuery(userId, box, status, page, size)` → `ChallengePage`
+    (reçus/envoyés/les deux, statut optionnel) ; `CountPendingChallengesQuery(userId)`.
+  - `UserFollowerQuery.GetUserFollowCountsQuery(userId)` → `UserFollowCounts` ;
+    `GetUserFollowsQuery(userId, direction, limit)` ; `ExistsUserFollowerQuery(followerId, followedId)`.
+  - `TopicFollowerQuery.GetTopicFollowsQuery(userId, limit)` ;
+    `ExistsTopicFollowerQuery(topicId, userId)`.
+- `Search*Query` restent dans le domaine pour les **futures surfaces d'administration** ;
+  `quizup-leaderboard` utilise désormais la query dédiée `GetUserFollowsQuery` pour la portée
+  « abonnements ».
+- **Désabonnement authentifié** : `UnfollowUserCommand(followId, actorId)` /
+  `UnfollowTopicCommand(followId, actorId)` vérifient que l'acteur est bien propriétaire du suivi
+  (`NotFollowOwnerProblem`, catégorie `PERMISSION`).
 - `ChallengeResponse` expose `gameId`.
+
+### Fin de défi (C2)
+
+- **Runs asynchrones validés** : `RegisterChallengeRunCommand` vérifie via
+  `ChallengeRunGamePort` (query dédiée `GameQuery.GetGameRunInfoQuery`) que la partie est un run
+  `ASYNC` du même sujet appartenant au joueur.
+- **Acceptation refusée si expiré** (`ChallengeExpiredProblem`) : la deadline de la saga n'est
+  qu'un déclencheur, la garde d'état est dans l'agrégat.
+- **Complétion et vainqueur** : `ChallengeRunResultHandler` (`@ProcessingGroup
+  challenge-run-result`) consomme `GameRunRecordedEvent` / `GameEndedEvent` du bus partagé et
+  route vers `RecordChallengeRunResultCommand` (deux scores connus ⇒ `COMPLETED`) ou
+  `CompleteChallengeCommand` (partie synchrone d'un défi accepté). Le vainqueur est le meilleur
+  score (`null` en cas d'égalité) ; `ChallengeCompletedEvent` notifie les deux joueurs.
+- `ChallengeQuery.FindChallengeByGameIdQuery` retrouve le défi lié à une partie (sync ou run).

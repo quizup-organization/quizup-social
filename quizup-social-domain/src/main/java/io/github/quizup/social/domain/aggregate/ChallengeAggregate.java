@@ -5,6 +5,7 @@ import io.github.quizup.social.domain.event.*;
 import io.github.quizup.social.domain.exception.ChallengeExceptions;
 import io.github.quizup.social.domain.model.ChallengeDeadline;
 import io.github.quizup.social.domain.model.ChallengeStatus;
+import io.github.quizup.social.domain.port.out.ChallengeRunGamePort;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
@@ -19,12 +20,13 @@ import java.util.UUID;
 /**
  * ChallengeAggregate — Cycle de vie d'un défi.
  * <p>
- * Flux simplifié :
- * - CreateChallenge → PENDING (orchestration délai déléguée à la saga)
- * - AcceptChallenge → ACCEPTED (orchestration CreateGame déléguée à la saga)
- * - DeclineChallenge → DECLINED (rien à annuler)
- * - CancelChallenge → CANCELED (instigateur, tant que PENDING)
- * - ExpireChallenge → EXPIRED (rien à annuler)
+ * Flux :
+ * - CreateChallenge → PENDING (orchestration du délai déléguée à la saga)
+ * - AcceptChallenge → ACCEPTED (création de la partie déléguée à la saga ; refusé si expiré)
+ * - DeclineChallenge → DECLINED / CancelChallenge → CANCELED / ExpireChallenge → EXPIRED
+ * - RegisterChallengeRun → runs asynchrones (gameId validé)
+ * - RecordChallengeRunResult → scores des runs ; les deux connus ⇒ COMPLETED + vainqueur
+ * - CompleteChallenge → défi synchrone terminé (résultat autoritaire de la partie)
  */
 @Aggregate
 public class ChallengeAggregate {
@@ -44,6 +46,10 @@ public class ChallengeAggregate {
     private Instant acceptedAt;
     private Instant declinedAt;
     private Instant expiresAt;
+    private Integer challengerScore;
+    private Integer challengedScore;
+    private String winnerId;
+    private Instant completedAt;
 
     protected ChallengeAggregate() {
     }
@@ -58,7 +64,6 @@ public class ChallengeAggregate {
         }
 
         Instant now = Instant.now();
-
         Instant expiration = now.plus(ChallengeDeadline.CHALLENGE_EXPIRED_TIMEOUT);
 
         AggregateLifecycle.apply(
@@ -71,11 +76,10 @@ public class ChallengeAggregate {
                         expiration
                 )
         );
-
     }
 
     /**
-     * Accepter un défi → créer la partie et la démarrer.
+     * Accepter un défi → créer la partie et la démarrer (via la saga).
      */
     @CommandHandler
     public void handle(ChallengeCommand.AcceptChallengeCommand command) {
@@ -84,7 +88,9 @@ public class ChallengeAggregate {
         if (!ChallengeStatus.PENDING.equals(status)) {
             throw new ChallengeExceptions.ChallengeNotPendingProblem(challengeId, status.name());
         }
-
+        if (expiresAt != null && !Instant.now().isBefore(expiresAt)) {
+            throw new ChallengeExceptions.ChallengeExpiredProblem(challengeId);
+        }
         if (!challengedId.equals(command.playerId())) {
             throw new ChallengeExceptions.UnauthorizedChallengeActionProblem(challengeId, command.playerId());
         }
@@ -100,7 +106,6 @@ public class ChallengeAggregate {
                         Instant.now()
                 )
         );
-
     }
 
     @CommandHandler
@@ -110,7 +115,6 @@ public class ChallengeAggregate {
         if (!ChallengeStatus.PENDING.equals(status)) {
             throw new ChallengeExceptions.ChallengeNotPendingProblem(challengeId, status.name());
         }
-
         if (!challengedId.equals(command.playerId())) {
             throw new ChallengeExceptions.UnauthorizedChallengeActionProblem(challengeId, command.playerId());
         }
@@ -132,7 +136,6 @@ public class ChallengeAggregate {
         if (!ChallengeStatus.PENDING.equals(status)) {
             throw new ChallengeExceptions.ChallengeNotPendingProblem(challengeId, status.name());
         }
-
         if (!challengerId.equals(command.playerId())) {
             throw new ChallengeExceptions.UnauthorizedChallengeActionProblem(challengeId, command.playerId());
         }
@@ -166,25 +169,27 @@ public class ChallengeAggregate {
     }
 
     /**
-     * Enregistre le run asynchrone d'un participant. Autorisé tant que le défi n'est ni
-     * refusé ni expiré ; un même joueur ne peut enregistrer qu'un seul run.
+     * Enregistre le run asynchrone d'un participant. Autorisé tant que le défi n'est ni refusé
+     * ni expiré ; un même joueur ne peut enregistrer qu'un seul run. Le {@code gameId} doit être
+     * une partie asynchrone du même sujet appartenant au joueur (validation synchrone).
      */
     @CommandHandler
-    public void handle(ChallengeCommand.RegisterChallengeRunCommand command) {
+    public void handle(ChallengeCommand.RegisterChallengeRunCommand command,
+                       ChallengeRunGamePort challengeRunGamePort) {
         logger.debug("Handling RegisterChallengeRunCommand: challengeId={}, playerId={}",
                 command.challengeId(), command.playerId());
 
-        if (!ChallengeStatus.PENDING.equals(status) && !ChallengeStatus.ACCEPTED.equals(status)) {
+        if (!isOpenForCompletion()) {
             throw new ChallengeExceptions.ChallengeNotPendingProblem(challengeId, status.name());
+        }
+        if (!isParticipant(command.playerId())) {
+            throw new ChallengeExceptions.UnauthorizedChallengeActionProblem(challengeId, command.playerId());
+        }
+        if (!challengeRunGamePort.isAsyncRunOwnedBy(command.gameId(), command.playerId(), topicId)) {
+            throw new ChallengeExceptions.ChallengeRunGameInvalidProblem(challengeId, command.gameId());
         }
 
         boolean isChallenger = challengerId.equals(command.playerId());
-        boolean isChallenged = challengedId.equals(command.playerId());
-
-        if (!isChallenger && !isChallenged) {
-            throw new ChallengeExceptions.UnauthorizedChallengeActionProblem(challengeId, command.playerId());
-        }
-
         String currentRun = isChallenger ? challengerGameId : challengedGameId;
         if (currentRun != null && !currentRun.equals(command.gameId())) {
             throw new ChallengeExceptions.ChallengeRunAlreadyRegisteredProblem(challengeId, command.playerId());
@@ -202,6 +207,92 @@ public class ChallengeAggregate {
         );
     }
 
+    /**
+     * Enregistre le score final d'un run asynchrone. Quand les deux scores sont connus, le défi
+     * se termine avec le vainqueur (égalité si scores identiques).
+     */
+    @CommandHandler
+    public void handle(ChallengeCommand.RecordChallengeRunResultCommand command) {
+        logger.debug("Handling RecordChallengeRunResultCommand: challengeId={}, playerId={}",
+                command.challengeId(), command.playerId());
+
+        if (!isOpenForCompletion() || !isParticipant(command.playerId())) {
+            return;
+        }
+
+        boolean isChallenger = challengerId.equals(command.playerId());
+        if ((isChallenger ? challengerGameId : challengedGameId) == null) {
+            return;
+        }
+        if ((isChallenger ? challengerScore : challengedScore) != null) {
+            return;
+        }
+
+        AggregateLifecycle.apply(
+                new ChallengeEvent.ChallengeRunResultRecordedEvent(
+                        challengeId,
+                        challengerId,
+                        challengedId,
+                        command.playerId(),
+                        command.score(),
+                        Instant.now()
+                )
+        );
+
+        if (challengerScore != null && challengedScore != null) {
+            applyCompleted(winnerOf(challengerScore, challengedScore), challengerScore, challengedScore);
+        }
+    }
+
+    /**
+     * Complète un défi synchrone à partir du résultat autoritaire de la partie.
+     */
+    @CommandHandler
+    public void handle(ChallengeCommand.CompleteChallengeCommand command) {
+        logger.debug("Handling CompleteChallengeCommand: challengeId={}", command.challengeId());
+
+        if (ChallengeStatus.COMPLETED.equals(status)) {
+            return;
+        }
+        if (!isOpenForCompletion()) {
+            throw new ChallengeExceptions.ChallengeNotPendingProblem(challengeId, status.name());
+        }
+
+        applyCompleted(command.winnerId(), command.challengerScore(), command.challengedScore());
+    }
+
+    private void applyCompleted(String winnerId, int challengerScore, int challengedScore) {
+        AggregateLifecycle.apply(
+                new ChallengeEvent.ChallengeCompletedEvent(
+                        challengeId,
+                        challengerId,
+                        challengedId,
+                        winnerId,
+                        challengerScore,
+                        challengedScore,
+                        Instant.now()
+                )
+        );
+    }
+
+    private boolean isParticipant(String playerId) {
+        return challengerId.equals(playerId) || challengedId.equals(playerId);
+    }
+
+    private boolean isOpenForCompletion() {
+        return ChallengeStatus.PENDING.equals(status) || ChallengeStatus.ACCEPTED.equals(status);
+    }
+
+    private String winnerOf(int challengerScore, int challengedScore) {
+        int comparison = Integer.compare(challengerScore, challengedScore);
+        if (comparison > 0) {
+            return challengerId;
+        }
+        if (comparison < 0) {
+            return challengedId;
+        }
+        return null;
+    }
 
     // === Event Sourcing Handlers ===
 
@@ -244,6 +335,24 @@ public class ChallengeAggregate {
         if (challengerGameId != null && challengedGameId != null) {
             this.replayGameId = event.gameId();
         }
+    }
+
+    @EventSourcingHandler
+    public void on(ChallengeEvent.ChallengeRunResultRecordedEvent event) {
+        if (event.playerId().equals(challengerId)) {
+            this.challengerScore = event.score();
+        } else {
+            this.challengedScore = event.score();
+        }
+    }
+
+    @EventSourcingHandler
+    public void on(ChallengeEvent.ChallengeCompletedEvent event) {
+        this.status = ChallengeStatus.COMPLETED;
+        this.winnerId = event.winnerId();
+        this.challengerScore = event.challengerScore();
+        this.challengedScore = event.challengedScore();
+        this.completedAt = event.completedAt();
     }
 
     @EventSourcingHandler

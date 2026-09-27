@@ -47,4 +47,17 @@ public final class SocialExceptions {
                     Map.of("followId", followId));
         }
     }
+
+    /**
+     * Le désabonnement n'est autorisé que pour le joueur concerné par le suivi.
+     */
+    public static class NotFollowOwnerProblem extends SocialProblem {
+        public NotFollowOwnerProblem(String followId, String actorId) {
+            super("urn:quizup:social:follow:notOwner",
+                    ProblemCategory.PERMISSION,
+                    "Not the owner of this follow",
+                    "User " + actorId + " cannot remove the follow " + followId,
+                    Map.of("followId", followId, "actorId", actorId));
+        }
+    }
 }

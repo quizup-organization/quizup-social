@@ -61,5 +61,25 @@ public final class ChallengeExceptions {
                     Map.of("userId", userId));
         }
     }
+
+    public static class ChallengeExpiredProblem extends ChallengeProblem {
+        public ChallengeExpiredProblem(String challengeId) {
+            super(challengeId, "urn:quizup:challenge:expired",
+                    ProblemCategory.BUSINESS_AGGREGATE,
+                    "Challenge expired",
+                    "The challenge " + challengeId + " has expired and can no longer be accepted",
+                    null);
+        }
+    }
+
+    public static class ChallengeRunGameInvalidProblem extends ChallengeProblem {
+        public ChallengeRunGameInvalidProblem(String challengeId, String gameId) {
+            super(challengeId, "urn:quizup:challenge:runGameInvalid",
+                    ProblemCategory.BUSINESS_INVALID_COMMAND,
+                    "Invalid challenge run game",
+                    "Game " + gameId + " is not an async run of this challenge's topic owned by the player",
+                    Map.of("gameId", gameId));
+        }
+    }
 }
 

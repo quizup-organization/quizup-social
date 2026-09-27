@@ -14,7 +14,8 @@ public interface UserFollowerCommand {
     }
 
     record UnfollowUserCommand(
-            @TargetAggregateIdentifier String followId
+            @TargetAggregateIdentifier String followId,
+            String actorId
     ) implements UserFollowerCommand {
     }
 }

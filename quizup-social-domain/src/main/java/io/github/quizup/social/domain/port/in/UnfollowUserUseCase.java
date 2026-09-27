@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture;
 public interface UnfollowUserUseCase {
     CompletableFuture<String> unfollow(UserFollowerCommand.UnfollowUserCommand command);
 
-    default CompletableFuture<String> unfollow(String followId) {
-        return unfollow(new UserFollowerCommand.UnfollowUserCommand(followId));
+    default CompletableFuture<String> unfollow(String followId, String actorId) {
+        return unfollow(new UserFollowerCommand.UnfollowUserCommand(followId, actorId));
     }
 }

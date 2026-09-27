@@ -45,7 +45,11 @@ public class ChallengeProjection {
                 event.createdAt(),
                 null,
                 null,
-                event.expiresAt()
+                event.expiresAt(),
+                null,
+                null,
+                null,
+                null
         );
 
         challengeRepositoryPort.save(challenge);
@@ -123,5 +127,22 @@ public class ChallengeProjection {
                     .replayGameId(replayGameId)
                     .build());
         });
+    }
+
+    @EventHandler
+    @Transactional
+    public void on(ChallengeEvent.ChallengeCompletedEvent event) {
+        logger.debug("Projecting ChallengeCompletedEvent: challengeId={}, winnerId={}",
+                event.challengeId(), event.winnerId());
+
+        challengeRepositoryPort.findById(event.challengeId()).ifPresent(challenge ->
+                challengeRepositoryPort.save(challenge.toBuilder()
+                        .status(ChallengeStatus.COMPLETED)
+                        .winnerId(event.winnerId())
+                        .challengerScore(event.challengerScore())
+                        .challengedScore(event.challengedScore())
+                        .completedAt(event.completedAt())
+                        .build())
+        );
     }
 }

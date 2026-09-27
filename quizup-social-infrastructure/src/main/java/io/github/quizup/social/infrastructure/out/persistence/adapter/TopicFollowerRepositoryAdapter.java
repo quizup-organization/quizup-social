@@ -9,8 +9,10 @@ import io.github.quizup.social.domain.port.out.TopicFollowerRepositoryPort;
 import io.github.quizup.social.infrastructure.out.persistence.entity.TopicFollowerEntity;
 import io.github.quizup.social.infrastructure.out.persistence.mapper.TopicFollowerEntityMapper;
 import io.github.quizup.social.infrastructure.out.persistence.repository.TopicFollowerJpaRepository;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -52,5 +54,12 @@ public class TopicFollowerRepositoryAdapter implements TopicFollowerRepositoryPo
     public SearchResponse<TopicFollower> findAll(SearchRequest request) {
         return topicFollowerSearchAdapter.findAll(request)
                 .map(TopicFollowerEntityMapper::toDomain);
+    }
+
+    @Override
+    public List<TopicFollower> findByUser(String userId, int limit) {
+        return topicFollowerJpaRepository.findByUserIdOrderByFollowedAtDesc(userId, Limit.of(limit)).stream()
+                .map(TopicFollowerEntityMapper::toDomain)
+                .toList();
     }
 }

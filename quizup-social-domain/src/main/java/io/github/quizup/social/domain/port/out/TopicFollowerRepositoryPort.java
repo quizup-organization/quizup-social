@@ -4,6 +4,7 @@ import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchR
 import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 import io.github.quizup.social.domain.model.TopicFollower;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TopicFollowerRepositoryPort {
@@ -17,4 +18,9 @@ public interface TopicFollowerRepositoryPort {
     boolean exists(String topicId, String userId);
 
     SearchResponse<TopicFollower> findAll(SearchRequest request);
+
+    /**
+     * Sujets suivis par le joueur, plus récents d'abord.
+     */
+    List<TopicFollower> findByUser(String userId, int limit);
 }

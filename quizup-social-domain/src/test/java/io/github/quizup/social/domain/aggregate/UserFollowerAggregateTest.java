@@ -87,7 +87,25 @@ class UserFollowerAggregateTest {
                         "follower-1:followed-1", "follower-1", "followed-1", Instant.now()),
                         new UserFollowerEvent.UserUnfollowedEvent(
                                 "follower-1:followed-1", "follower-1", "followed-1", Instant.now()))
-                .when(new UserFollowerCommand.UnfollowUserCommand("follower-1:followed-1"))
+                .when(new UserFollowerCommand.UnfollowUserCommand("follower-1:followed-1", "follower-1"))
                 .expectNoEvents();
+    }
+
+    @Test
+    void unfollowUser_byOwner_appliesUserUnfollowedEvent() {
+        fixture.given(new UserFollowerEvent.UserFollowedEvent(
+                        "follower-1:followed-1", "follower-1", "followed-1", Instant.now()))
+                .when(new UserFollowerCommand.UnfollowUserCommand("follower-1:followed-1", "follower-1"))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        UserFollowerEvent.UserUnfollowedEvent.class,
+                        e -> ((UserFollowerEvent.UserUnfollowedEvent) e).followId().equals("follower-1:followed-1")));
+    }
+
+    @Test
+    void unfollowUser_byAnotherUser_isRejected() {
+        fixture.given(new UserFollowerEvent.UserFollowedEvent(
+                        "follower-1:followed-1", "follower-1", "followed-1", Instant.now()))
+                .when(new UserFollowerCommand.UnfollowUserCommand("follower-1:followed-1", "follower-2"))
+                .expectException(SocialExceptions.NotFollowOwnerProblem.class);
     }
 }

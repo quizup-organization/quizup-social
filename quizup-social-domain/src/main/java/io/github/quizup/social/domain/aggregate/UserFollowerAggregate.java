@@ -62,11 +62,14 @@ public class UserFollowerAggregate {
         );
     }
 
-    /** Désabonnement idempotent (no-op si déjà désabonné). */
+    /** Désabonnement idempotent (no-op si déjà désabonné) ; réservé au propriétaire du suivi. */
     @CommandHandler
     public void handle(UserFollowerCommand.UnfollowUserCommand command) {
         if (!followed) {
             return;
+        }
+        if (!this.followerId.equals(command.actorId())) {
+            throw new SocialExceptions.NotFollowOwnerProblem(this.followId, command.actorId());
         }
         AggregateLifecycle.apply(
                 new UserFollowerEvent.UserUnfollowedEvent(
