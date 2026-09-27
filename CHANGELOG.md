@@ -1,3 +1,9 @@
+## [2.1.0](https://github.com/quizup-organization/quizup-social/compare/v2.0.0...v2.1.0) (2026-09-27)
+
+### Features
+
+* **social:** challenge completion, dedicated box/follow queries and actor-checked unfollows ([bdfc635](https://github.com/quizup-organization/quizup-social/commit/bdfc635f48604e67ccdf70e2e0715f75d364437f))
+
 ## [2.0.0](https://github.com/quizup-organization/quizup-social/compare/v1.7.3...v2.0.0) (2026-09-25)
 
 ### ⚠ BREAKING CHANGES
