@@ -1,3 +1,13 @@
+## [3.0.0](https://github.com/quizup-organization/quizup-social/compare/v2.1.0...v3.0.0) (2026-09-30)
+
+### ⚠ BREAKING CHANGES
+
+* **social:** ChallengeProfile carries the player language; accept is guarded by topic language availability (TopicAvailabilityPort); ChallengeSaga forwards required languages to CreateGameCommand (pins SDK 4.1.0, profile 3.0.0, game 4.0.0, theme 4.0.0).
+
+### Features
+
+* **social:** language-aware challenge acceptance and game creation ([e57cd7f](https://github.com/quizup-organization/quizup-social/commit/e57cd7f809a69d29fbbfab9d98c0b0cf060e2087))
+
 ## [2.1.0](https://github.com/quizup-organization/quizup-social/compare/v2.0.0...v2.1.0) (2026-09-27)
 
 ### Features
