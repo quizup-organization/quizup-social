@@ -1,3 +1,9 @@
+## [3.0.1](https://github.com/quizup-organization/quizup-social/compare/v3.0.0...v3.0.1) (2026-09-30)
+
+### Bug Fixes
+
+* **social:** guard challenge languages at creation/acceptance and fail challenged games ([dbca2b1](https://github.com/quizup-organization/quizup-social/commit/dbca2b11090e3557c68ff542ab3254fd882f101a))
+
 ## [3.0.0](https://github.com/quizup-organization/quizup-social/compare/v2.1.0...v3.0.0) (2026-09-30)
 
 ### ⚠ BREAKING CHANGES
