@@ -31,7 +31,7 @@ public class ProfileService implements ProfileRepositoryPort {
                 new ProfileQuery.GetProfileQuery(identifier),
                 QueryResponseTypes.instanceOf(Profile.class)
         ).join();
-        return new ChallengeProfile(profile.userId(), profile.displayName());
+        return new ChallengeProfile(profile.userId(), profile.pseudonym(), profile.language());
     }
 
 

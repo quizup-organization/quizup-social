@@ -8,6 +8,7 @@ import io.github.quizup.social.domain.port.out.ProfileRepositoryPort;
 import io.github.quizup.game.domain.command.GameCommand;
 import io.github.quizup.game.domain.model.GameMode;
 import io.github.quizup.game.domain.model.GamePlayerType;
+import io.github.quizup.microservice.core.domain.model.i18n.Language;
 import lombok.Getter;
 import lombok.Setter;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -21,6 +22,9 @@ import org.axonframework.spring.stereotype.Saga;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Saga
 @ProcessingGroup("challenge-saga")
@@ -98,6 +102,7 @@ public class ChallengeSaga {
                         challengedProfile.id(),
                         challengedProfile.name(),
                         GameMode.SYNC,
+                        languagesOf(challengerProfile, challengedProfile),
                         GamePlayerType.HUMAN,
                         null,
                         null
@@ -139,6 +144,17 @@ public class ChallengeSaga {
             deadlineManager.cancelSchedule(ChallengeDeadline.CHALLENGE_EXPIRED, challengeExpiredDeadlineId);
             challengeExpiredDeadlineId = null;
         }
+    }
+
+    /** Langues non nulles des joueurs fournis (union). */
+    private static Set<Language> languagesOf(ChallengeProfile... profiles) {
+        Set<Language> languages = new HashSet<>();
+        for (ChallengeProfile profile : profiles) {
+            if (profile != null && profile.language() != null) {
+                languages.add(profile.language());
+            }
+        }
+        return languages;
     }
 }
 

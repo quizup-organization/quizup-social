@@ -1,8 +1,10 @@
 package io.github.quizup.social.domain.exception;
 
 import io.github.quizup.microservice.core.domain.exception.ProblemCategory;
+import io.github.quizup.microservice.core.domain.model.i18n.Language;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Exceptions spécifiques au domaine Challenge
@@ -11,6 +13,17 @@ public final class ChallengeExceptions {
 
     private ChallengeExceptions() {
         // Classe utilitaire
+    }
+
+    public static class TopicNotAvailableInLanguageProblem extends ChallengeProblem {
+        public TopicNotAvailableInLanguageProblem(String topicId, Set<Language> languages) {
+            super(topicId, "urn:quizup:challenge:topicNotAvailableInLanguage",
+                    ProblemCategory.BUSINESS_INVALID_COMMAND,
+                    "Topic not available in the players' languages",
+                    "Le thème " + topicId + " n'a pas assez de questions dans " + languages,
+                    Map.of("topicId", topicId,
+                            "languages", languages.stream().map(Language::code).toList()));
+        }
     }
 
     public static class ChallengeNotFoundProblem extends ChallengeProblem {

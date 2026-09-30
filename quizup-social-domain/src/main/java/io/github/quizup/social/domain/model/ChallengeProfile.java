@@ -1,4 +1,6 @@
 package io.github.quizup.social.domain.model;
 
-public record ChallengeProfile(String id, String name) {
+import io.github.quizup.microservice.core.domain.model.i18n.Language;
+
+public record ChallengeProfile(String id, String name, Language language) {
 }

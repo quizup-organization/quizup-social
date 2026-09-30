@@ -51,7 +51,12 @@ exposée par le service.
 | `ProfileRepositoryPort`  | `quizup-profile`    | `ProfileQuery.ProfileExistsByIdQuery`, `ProfileQuery.GetProfileQuery` |
 
 Implémentation dans `application/service/` : `ProfileService`
-(→ profile, nom via `Profile::displayName`).
+(→ profile, pseudonyme + langue via `Profile::pseudonym` / `Profile::language`).
+
+**Garde linguistique** : `ChallengeCommandService.accept` vérifie via `TopicAvailabilityPort`
+(query theme `CountApprovedQuestionsByTopicAndLanguagesQuery`) que le thème couvre les langues des
+deux joueurs — sinon `TopicNotAvailableInLanguageProblem`. La `ChallengeSaga` transmet l'union des
+langues à `GameCommand.CreateGameCommand` (sélection stricte côté game).
 
 > Le suivi de sujet ne valide **plus** l'existence du topic (pas de requête synchrone vers
 > `quizup-theme` sur le chemin d'écriture) : le `topicId` vient d'un sujet affiché par le client et
