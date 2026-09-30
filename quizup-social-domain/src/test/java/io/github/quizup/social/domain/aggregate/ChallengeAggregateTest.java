@@ -1,16 +1,21 @@
 package io.github.quizup.social.domain.aggregate;
 
 import io.github.quizup.axon.test.QuizUpAxonMatchers;
+import io.github.quizup.microservice.core.domain.model.i18n.Language;
 import io.github.quizup.social.domain.command.ChallengeCommand;
 import io.github.quizup.social.domain.event.ChallengeEvent;
 import io.github.quizup.social.domain.exception.ChallengeExceptions;
+import io.github.quizup.social.domain.model.ChallengeProfile;
 import io.github.quizup.social.domain.port.out.ChallengeRunGamePort;
+import io.github.quizup.social.domain.port.out.ProfileRepositoryPort;
+import io.github.quizup.social.domain.port.out.TopicAvailabilityPort;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -29,14 +34,23 @@ class ChallengeAggregateTest {
     private static final String TOPIC = "topic-1";
 
     private final ChallengeRunGamePort challengeRunGamePort = mock(ChallengeRunGamePort.class);
+    private final ProfileRepositoryPort profileRepositoryPort = mock(ProfileRepositoryPort.class);
+    private final TopicAvailabilityPort topicAvailabilityPort = mock(TopicAvailabilityPort.class);
 
     private final AggregateTestFixture<ChallengeAggregate> fixture =
             new AggregateTestFixture<>(ChallengeAggregate.class);
 
     @BeforeEach
     void setUp() {
-        fixture.registerInjectableResource(challengeRunGamePort);
+        fixture.registerInjectableResource(challengeRunGamePort)
+                .registerInjectableResource(profileRepositoryPort)
+                .registerInjectableResource(topicAvailabilityPort);
         when(challengeRunGamePort.isAsyncRunOwnedBy(anyString(), anyString(), eq(TOPIC))).thenReturn(true);
+        when(profileRepositoryPort.getById(CHALLENGER))
+                .thenReturn(new ChallengeProfile(CHALLENGER, "Alpha", Language.FR));
+        when(profileRepositoryPort.getById(CHALLENGED))
+                .thenReturn(new ChallengeProfile(CHALLENGED, "Bravo", Language.FR));
+        when(topicAvailabilityPort.coversAllLanguages(eq(TOPIC), anySet())).thenReturn(true);
     }
 
     @Test
@@ -50,6 +64,41 @@ class ChallengeAggregateTest {
                         ChallengeEvent.ChallengeCreatedEvent.class,
                         e -> ((ChallengeEvent.ChallengeCreatedEvent) e).challengeId().equals(CHALLENGE_ID)
                                 && ((ChallengeEvent.ChallengeCreatedEvent) e).challengerId().equals(CHALLENGER)));
+    }
+
+    @Test
+    void createChallenge_whenTopicDoesNotCoverLanguages_isRejected() {
+        when(topicAvailabilityPort.coversAllLanguages(eq(TOPIC), anySet())).thenReturn(false);
+
+        fixture.givenNoPriorActivity()
+                .when(new ChallengeCommand.CreateChallengeCommand(CHALLENGE_ID, CHALLENGER, CHALLENGED, TOPIC))
+                .expectException(ChallengeExceptions.TopicNotAvailableInLanguageProblem.class);
+    }
+
+    @Test
+    void acceptChallenge_whenTopicDoesNotCoverLanguages_isRejected() {
+        when(topicAvailabilityPort.coversAllLanguages(eq(TOPIC), anySet())).thenReturn(false);
+
+        fixture.given(created())
+                .when(new ChallengeCommand.AcceptChallengeCommand(CHALLENGE_ID, CHALLENGED))
+                .expectException(ChallengeExceptions.TopicNotAvailableInLanguageProblem.class);
+    }
+
+    @Test
+    void failChallenge_appliesChallengeFailedEvent() {
+        fixture.given(created(), accepted())
+                .when(new ChallengeCommand.FailChallengeCommand(CHALLENGE_ID, "GAME_CREATION_FAILED"))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        ChallengeEvent.ChallengeFailedEvent.class,
+                        e -> "GAME_CREATION_FAILED"
+                                .equals(((ChallengeEvent.ChallengeFailedEvent) e).reason())));
+    }
+
+    @Test
+    void failChallenge_whenPending_isIgnored() {
+        fixture.given(created())
+                .when(new ChallengeCommand.FailChallengeCommand(CHALLENGE_ID, "GAME_CREATION_FAILED"))
+                .expectNoEvents();
     }
 
     @Test

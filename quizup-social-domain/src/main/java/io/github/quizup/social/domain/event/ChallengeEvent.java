@@ -67,6 +67,19 @@ public interface ChallengeEvent {
     }
 
     /**
+     * Event publié quand un défi accepté ne peut pas aboutir à une partie
+     * (échec de création de partie). Le défi est alors clos ({@code CANCELED}).
+     */
+    record ChallengeFailedEvent(
+            String challengeId,
+            String challengerId,
+            String challengedId,
+            String reason,
+            Instant failedAt
+    ) implements ChallengeEvent {
+    }
+
+    /**
      * Event publié quand un participant enregistre son run asynchrone.
      */
     record ChallengeRunRegisteredEvent(

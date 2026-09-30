@@ -3,6 +3,7 @@ package io.github.quizup.social.application.saga;
 import io.github.quizup.social.domain.command.ChallengeCommand;
 import io.github.quizup.social.domain.event.ChallengeEvent;
 import io.github.quizup.social.domain.model.ChallengeDeadline;
+import io.github.quizup.social.domain.model.ChallengeLanguages;
 import io.github.quizup.social.domain.model.ChallengeProfile;
 import io.github.quizup.social.domain.port.out.ProfileRepositoryPort;
 import io.github.quizup.game.domain.command.GameCommand;
@@ -23,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Saga
@@ -93,8 +93,8 @@ public class ChallengeSaga {
     public void on(ChallengeEvent.ChallengeAcceptedEvent event) {
         cancelChallengeExpiredDeadline();
 
-        commandGateway.send(
-                new GameCommand.CreateGameCommand(
+        commandGateway
+                .send(new GameCommand.CreateGameCommand(
                         event.gameId(),
                         topicId,
                         challengerProfile.id(),
@@ -102,12 +102,19 @@ public class ChallengeSaga {
                         challengedProfile.id(),
                         challengedProfile.name(),
                         GameMode.SYNC,
-                        languagesOf(challengerProfile, challengedProfile),
+                        ChallengeLanguages.of(challengerProfile, challengedProfile),
                         GamePlayerType.HUMAN,
                         null,
                         null
-                )
-        );
+                ))
+                .whenComplete((result, error) -> {
+                    if (error != null) {
+                        logger.error("Game creation failed, failing challenge: challengeId={}, gameId={}",
+                                challengeId, event.gameId(), error);
+                        commandGateway.send(new ChallengeCommand.FailChallengeCommand(
+                                challengeId, "GAME_CREATION_FAILED"));
+                    }
+                });
 
         logger.info("Game creation orchestrated: challengeId={}, gameId={}", challengeId, event.gameId());
     }
@@ -144,17 +151,6 @@ public class ChallengeSaga {
             deadlineManager.cancelSchedule(ChallengeDeadline.CHALLENGE_EXPIRED, challengeExpiredDeadlineId);
             challengeExpiredDeadlineId = null;
         }
-    }
-
-    /** Langues non nulles des joueurs fournis (union). */
-    private static Set<Language> languagesOf(ChallengeProfile... profiles) {
-        Set<Language> languages = new HashSet<>();
-        for (ChallengeProfile profile : profiles) {
-            if (profile != null && profile.language() != null) {
-                languages.add(profile.language());
-            }
-        }
-        return languages;
     }
 }
 

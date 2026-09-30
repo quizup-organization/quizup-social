@@ -4,8 +4,12 @@ import io.github.quizup.social.domain.command.*;
 import io.github.quizup.social.domain.event.*;
 import io.github.quizup.social.domain.exception.ChallengeExceptions;
 import io.github.quizup.social.domain.model.ChallengeDeadline;
+import io.github.quizup.social.domain.model.ChallengeLanguages;
 import io.github.quizup.social.domain.model.ChallengeStatus;
 import io.github.quizup.social.domain.port.out.ChallengeRunGamePort;
+import io.github.quizup.social.domain.port.out.ProfileRepositoryPort;
+import io.github.quizup.social.domain.port.out.TopicAvailabilityPort;
+import io.github.quizup.microservice.core.domain.model.i18n.Language;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
@@ -15,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -55,13 +60,18 @@ public class ChallengeAggregate {
     }
 
     @CommandHandler
-    public ChallengeAggregate(ChallengeCommand.CreateChallengeCommand command) {
+    public ChallengeAggregate(ChallengeCommand.CreateChallengeCommand command,
+                              ProfileRepositoryPort profileRepositoryPort,
+                              TopicAvailabilityPort topicAvailabilityPort) {
         logger.debug("Handling CreateChallengeCommand: challengeId={}, challengerId={}, challengedId={}",
                 command.challengeId(), command.challengerId(), command.challengedId());
 
         if (command.challengerId().equals(command.challengedId())) {
             throw new ChallengeExceptions.CannotChallengeSelfProblem(command.challengedId());
         }
+
+        requireTopicCoversLanguages(profileRepositoryPort, topicAvailabilityPort,
+                command.challengerId(), command.challengedId(), command.topicId());
 
         Instant now = Instant.now();
         Instant expiration = now.plus(ChallengeDeadline.CHALLENGE_EXPIRED_TIMEOUT);
@@ -80,9 +90,13 @@ public class ChallengeAggregate {
 
     /**
      * Accepter un défi → créer la partie et la démarrer (via la saga).
+     * Garde défensive : le thème doit couvrir les langues des deux joueurs (re-vérifié ici,
+     * même si la création l'a déjà validé).
      */
     @CommandHandler
-    public void handle(ChallengeCommand.AcceptChallengeCommand command) {
+    public void handle(ChallengeCommand.AcceptChallengeCommand command,
+                       ProfileRepositoryPort profileRepositoryPort,
+                       TopicAvailabilityPort topicAvailabilityPort) {
         logger.debug("Handling AcceptChallengeCommand: challengeId={}", command.challengeId());
 
         if (!ChallengeStatus.PENDING.equals(status)) {
@@ -94,6 +108,9 @@ public class ChallengeAggregate {
         if (!challengedId.equals(command.playerId())) {
             throw new ChallengeExceptions.UnauthorizedChallengeActionProblem(challengeId, command.playerId());
         }
+
+        requireTopicCoversLanguages(profileRepositoryPort, topicAvailabilityPort,
+                challengerId, challengedId, topicId);
 
         String gameId = UUID.randomUUID().toString();
 
@@ -163,6 +180,30 @@ public class ChallengeAggregate {
                         challengeId,
                         challengerId,
                         challengedId,
+                        Instant.now()
+                )
+        );
+    }
+
+    /**
+     * Commande système : le défi accepté n'a pas pu aboutir à une partie (échec de création).
+     * Idempotente : no-op si le défi n'est plus {@code ACCEPTED}.
+     */
+    @CommandHandler
+    public void handle(ChallengeCommand.FailChallengeCommand command) {
+        logger.debug("Handling FailChallengeCommand: challengeId={}, reason={}",
+                command.challengeId(), command.reason());
+
+        if (!ChallengeStatus.ACCEPTED.equals(status)) {
+            return;
+        }
+
+        AggregateLifecycle.apply(
+                new ChallengeEvent.ChallengeFailedEvent(
+                        challengeId,
+                        challengerId,
+                        challengedId,
+                        command.reason(),
                         Instant.now()
                 )
         );
@@ -279,6 +320,23 @@ public class ChallengeAggregate {
         return challengerId.equals(playerId) || challengedId.equals(playerId);
     }
 
+    /**
+     * Exige que le thème dispose d'assez de questions dans toutes les langues des deux joueurs
+     * (sélection stricte côté game) — sinon le défi est refusé avant toute création.
+     */
+    private static void requireTopicCoversLanguages(ProfileRepositoryPort profileRepositoryPort,
+                                                    TopicAvailabilityPort topicAvailabilityPort,
+                                                    String challengerId,
+                                                    String challengedId,
+                                                    String topicId) {
+        Set<Language> languages = ChallengeLanguages.of(
+                profileRepositoryPort.getById(challengerId),
+                profileRepositoryPort.getById(challengedId));
+        if (!topicAvailabilityPort.coversAllLanguages(topicId, languages)) {
+            throw new ChallengeExceptions.TopicNotAvailableInLanguageProblem(topicId, languages);
+        }
+    }
+
     private boolean isOpenForCompletion() {
         return ChallengeStatus.PENDING.equals(status) || ChallengeStatus.ACCEPTED.equals(status);
     }
@@ -321,6 +379,11 @@ public class ChallengeAggregate {
 
     @EventSourcingHandler
     public void on(ChallengeEvent.ChallengeCanceledEvent event) {
+        this.status = ChallengeStatus.CANCELED;
+    }
+
+    @EventSourcingHandler
+    public void on(ChallengeEvent.ChallengeFailedEvent event) {
         this.status = ChallengeStatus.CANCELED;
     }
 

@@ -53,10 +53,12 @@ exposée par le service.
 Implémentation dans `application/service/` : `ProfileService`
 (→ profile, pseudonyme + langue via `Profile::pseudonym` / `Profile::language`).
 
-**Garde linguistique** : `ChallengeCommandService.accept` vérifie via `TopicAvailabilityPort`
-(query theme `CountApprovedQuestionsByTopicAndLanguagesQuery`) que le thème couvre les langues des
-deux joueurs — sinon `TopicNotAvailableInLanguageProblem`. La `ChallengeSaga` transmet l'union des
-langues à `GameCommand.CreateGameCommand` (sélection stricte côté game).
+**Garde linguistique** : `ChallengeAggregate` (création **et** acceptation) vérifie via
+`ProfileRepositoryPort` + `TopicAvailabilityPort` (query theme
+`CountApprovedQuestionsByTopicAndLanguagesQuery`) que le thème couvre les langues des deux joueurs
+— sinon `TopicNotAvailableInLanguageProblem`. La `ChallengeSaga` transmet l'union des langues à
+`GameCommand.CreateGameCommand` (sélection stricte côté game) et émet `FailChallengeCommand`
+(→ `ChallengeFailedEvent`, statut `CANCELED`) si la création de partie échoue malgré tout.
 
 > Le suivi de sujet ne valide **plus** l'existence du topic (pas de requête synchrone vers
 > `quizup-theme` sur le chemin d'écriture) : le `topicId` vient d'un sujet affiché par le client et

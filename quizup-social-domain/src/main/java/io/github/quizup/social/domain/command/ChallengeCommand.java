@@ -53,6 +53,16 @@ public interface ChallengeCommand {
     }
 
     /**
+     * Commande système : un défi accepté n'a pas pu donner lieu à une partie
+     * (échec de création de partie, incident infra). Le défi est clos en {@code CANCELED}.
+     */
+    record FailChallengeCommand(
+            @TargetAggregateIdentifier String challengeId,
+            String reason
+    ) implements ChallengeCommand {
+    }
+
+    /**
      * Enregistre le run asynchrone d'un participant (jeu en différé). Le premier run
      * enregistré sert de référence au replay de l'adversaire. Le {@code gameId} est validé
      * (partie asynchrone du même sujet, appartenant au joueur).
