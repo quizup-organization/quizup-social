@@ -1,3 +1,13 @@
+## [4.0.0](https://github.com/quizup-organization/quizup-social/compare/v3.0.1...v4.0.0) (2026-10-02)
+
+### ⚠ BREAKING CHANGES
+
+* **social:** remove challenges bounded context
+
+### Features
+
+* **social:** remove challenges bounded context ([3abab9f](https://github.com/quizup-organization/quizup-social/commit/3abab9fc9fc814d16a8eaca9eb19fa58c70542b6))
+
 ## [3.0.1](https://github.com/quizup-organization/quizup-social/compare/v3.0.0...v3.0.1) (2026-09-30)
 
 ### Bug Fixes
