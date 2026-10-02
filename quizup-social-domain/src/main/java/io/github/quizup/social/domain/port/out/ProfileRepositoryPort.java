@@ -1,11 +1,9 @@
 package io.github.quizup.social.domain.port.out;
 
-import io.github.quizup.social.domain.model.ChallengeProfile;
-
+/**
+ * Port sortant — existence d'un profil (validation d'un suivi de joueur).
+ */
 public interface ProfileRepositoryPort {
 
     boolean existsById(String identifier);
-
-    ChallengeProfile getById(String identifier);
 }
-

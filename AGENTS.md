@@ -12,10 +12,12 @@
 
 Gestion des relations sociales entre joueurs :
 
-- **Challenges** : défis 1v1 (création, accept/reject) — le frontend les appelle via
-  `/api/challenges` (surface BFF)
 - **TopicFollower** : abonnements aux topics (follow/unfollow)
 - **UserFollower** : abonnements aux joueurs (follow/unfollow, unidirectionnel)
+
+> Les **défis (challenges)** ont été **retirés** du service : un défi est désormais un **salon
+> privé** géré par `quizup-matchmaking` (surface BFF `/api/lobbies`). Les tables legacy
+> `challenge_entry` ne sont plus créées.
 
 **Package** : `io.github.quizup.social`
 
