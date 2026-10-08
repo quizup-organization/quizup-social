@@ -4,7 +4,7 @@
 > unidirectionnel (sans amitié ni demande). Architecture : Axon Framework (CQRS/EDA) + JPA
 > (projections).
 > Pour les règles de patterns : [
-`../../best-practices/.backend/hexagonal-architecture.md`](../../best-practices/.backend/hexagonal-architecture.md).
+`../../best-practices/.backend/folder-structure.md`](../../best-practices/.backend/folder-structure.md).
 
 ---
 
