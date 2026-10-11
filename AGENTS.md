@@ -16,8 +16,8 @@ Gestion des relations sociales entre joueurs :
 - **UserFollower** : abonnements aux joueurs (follow/unfollow, unidirectionnel)
 
 > Les **défis (challenges)** ont été **retirés** du service : un défi nominatif est désormais un
-> **salon privé** géré par `quizup-matchmaking` (surface BFF `/api/lobbies { topicId, opponentId }`).
-> Les tables legacy `challenge_entry` ne sont plus créées.
+> **défi géré par `quizup-matchmaking`** (surface BFF `/api/challenges { topicId, opponentId }`,
+> puis salle `/api/rooms`). Les tables legacy `challenge_entry` ne sont plus créées.
 
 **Package** : `io.github.quizup.social`
 
