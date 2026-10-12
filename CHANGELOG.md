@@ -1,3 +1,13 @@
+## [5.0.0](https://github.com/quizup-organization/quizup-social/compare/v4.0.0...v5.0.0) (2026-10-12)
+
+### ⚠ BREAKING CHANGES
+
+* **social:** ProfileRepositoryPort retiré du domaine social.
+
+### Code Refactoring
+
+* **social:** supprime la vérification d'existence du profil (agrégat sans I/O) ([d366931](https://github.com/quizup-organization/quizup-social/commit/d366931957046a12b59ab5438def62b8a1c99862))
+
 ## [4.0.0](https://github.com/quizup-organization/quizup-social/compare/v3.0.1...v4.0.0) (2026-10-02)
 
 ### ⚠ BREAKING CHANGES
