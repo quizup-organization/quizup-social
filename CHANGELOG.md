@@ -1,3 +1,9 @@
+## [5.3.1](https://github.com/quizup-organization/quizup-social/compare/v5.3.0...v5.3.1) (2026-10-12)
+
+### Bug Fixes
+
+* **social:** SDK quizup-parent 4.7.1 (cycle de beans Configuration/bus distribué au démarrage) ([bf02bad](https://github.com/quizup-organization/quizup-social/commit/bf02bad8370c0331a93add87d05d39f04516dae8))
+
 ## [5.3.0](https://github.com/quizup-organization/quizup-social/compare/v5.2.0...v5.3.0) (2026-10-12)
 
 ### Features
