@@ -1,3 +1,9 @@
+## [5.1.0](https://github.com/quizup-organization/quizup-social/compare/v5.0.0...v5.1.0) (2026-10-12)
+
+### Features
+
+* **console:** consume quizup-sdk 4.5.2 (DLQ Axon par défaut + agent console) ([c0d2d61](https://github.com/quizup-organization/quizup-social/commit/c0d2d61f0e92a06a0cb7a275d97668dbe4626ea5))
+
 ## [5.0.0](https://github.com/quizup-organization/quizup-social/compare/v4.0.0...v5.0.0) (2026-10-12)
 
 ### ⚠ BREAKING CHANGES
