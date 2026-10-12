@@ -1,3 +1,9 @@
+## [5.2.0](https://github.com/quizup-organization/quizup-social/compare/v5.1.0...v5.2.0) (2026-10-12)
+
+### Features
+
+* **console:** consume quizup-sdk 4.6.0 (build-info + API interne event store/scheduled) ([920a8ff](https://github.com/quizup-organization/quizup-social/commit/920a8ff8e6fd3570e143ed5965eeeb2e65d24bd5))
+
 ## [5.1.0](https://github.com/quizup-organization/quizup-social/compare/v5.0.0...v5.1.0) (2026-10-12)
 
 ### Features
