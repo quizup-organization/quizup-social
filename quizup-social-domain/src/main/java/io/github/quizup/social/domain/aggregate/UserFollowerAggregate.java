@@ -3,7 +3,6 @@ package io.github.quizup.social.domain.aggregate;
 import io.github.quizup.social.domain.command.UserFollowerCommand;
 import io.github.quizup.social.domain.event.UserFollowerEvent;
 import io.github.quizup.social.domain.exception.SocialExceptions;
-import io.github.quizup.social.domain.port.out.ProfileRepositoryPort;
 import lombok.Getter;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -22,6 +21,10 @@ import java.time.Instant;
  * follow et re-suivi : pas d'ambiguïté constructeur/instance. L'agrégat est <b>non destructif</b>
  * (le désabonnement repasse {@code followed = false}), ce qui rend l'unicité race-free (Axon
  * sérialise les commandes par id d'agrégat) et le re-suivi idempotent.</p>
+ *
+ * <p><b>Aucune I/O</b> : l'existence de la cible n'est pas vérifiée ici (une cible inconnue n'a
+ * simplement pas de projection et reste invisible). L'agrégat ne fait que valider les invariants
+ * de la commande (voir {@code best-practices/.backend/command-preparation.md}).</p>
  */
 @Getter
 @Aggregate
@@ -39,18 +42,12 @@ public class UserFollowerAggregate {
 
     @CommandHandler
     @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
-    public void handle(
-            UserFollowerCommand.FollowUserCommand command,
-            ProfileRepositoryPort profileRepositoryPort
-    ) {
+    public void handle(UserFollowerCommand.FollowUserCommand command) {
         if (followed) {
             return;
         }
         if (command.followerId().equals(command.followedId())) {
             throw new SocialExceptions.CannotFollowSelfProblem(command.followerId());
-        }
-        if (!profileRepositoryPort.existsById(command.followedId())) {
-            throw new SocialExceptions.UserNotFoundProblem(command.followedId());
         }
         AggregateLifecycle.apply(
                 new UserFollowerEvent.UserFollowedEvent(

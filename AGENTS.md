@@ -44,11 +44,12 @@ exposée par le service.
 
 ## 4. Dépendances inter-services
 
-| Port out    | Service cible     | Query Axon envoyée (QueryGateway)                          |
-|-------------|-------------------|------------------------------------------------------------|
-| `ProfileRepositoryPort`  | `quizup-profile`    | `ProfileQuery.ProfileExistsByIdQuery`, `ProfileQuery.GetProfileQuery` |
-
-Implémentation dans `application/service/` : `ProfileService`.
+**Plus aucun port sortant inter-services.** Le suivi de joueur ne valide plus l'existence de la
+cible : une cible inconnue n'a simplement pas de projection et reste invisible (même logique que le
+suivi de sujet). Aucune I/O dans les handlers d'agrégat — voir
+`best-practices/.backend/command-preparation.md` et `best-practices/.backend/anti-patterns.md` § 2.
+L'ancien `ProfileRepositoryPort` / `ProfileService` (et la dépendance `quizup-profile-domain`) ont
+été supprimés.
 
 > Le suivi de sujet ne valide **plus** l'existence du topic (pas de requête synchrone vers
 > `quizup-theme` sur le chemin d'écriture) : le `topicId` vient d'un sujet affiché par le client et
