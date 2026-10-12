@@ -1,3 +1,9 @@
+## [5.3.0](https://github.com/quizup-organization/quizup-social/compare/v5.2.0...v5.3.0) (2026-10-12)
+
+### Features
+
+* **console:** consume quizup-sdk 4.7.0 (lag, commandes en vol, snapshots, scheduled) ([d37f88d](https://github.com/quizup-organization/quizup-social/commit/d37f88d1a97e5a8f68153432d6e80d2a0e586196))
+
 ## [5.2.0](https://github.com/quizup-organization/quizup-social/compare/v5.1.0...v5.2.0) (2026-10-12)
 
 ### Features
