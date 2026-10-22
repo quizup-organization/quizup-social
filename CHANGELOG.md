@@ -1,3 +1,9 @@
+## [5.4.0](https://github.com/quizup-organization/quizup-social/compare/v5.3.1...v5.4.0) (2026-10-22)
+
+### Features
+
+* **account:** efface les abonnements du compte supprimé ([f2463ba](https://github.com/quizup-organization/quizup-social/commit/f2463ba1428df31d6492b4d6fda17fe7ede202b9))
+
 ## [5.3.1](https://github.com/quizup-organization/quizup-social/compare/v5.3.0...v5.3.1) (2026-10-12)
 
 ### Bug Fixes
